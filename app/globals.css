@@ -1,0 +1,298 @@
+@import "tailwindcss";
+
+/*
+ * RepoLens — deep-space dark theme (committed single theme).
+ * Chart colors are the validated dark-mode palette from the dataviz method;
+ * charts reference roles (var(--series-N)), never raw hex.
+ */
+:root {
+  --page: #0d0d0d;
+  --surface-1: #1a1a19;
+  --glass: rgba(26, 26, 25, 0.66);
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted: #898781;
+  --grid-hairline: #2c2c2a;
+  --axis: #383835;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-bright: rgba(255, 255, 255, 0.18);
+  --delta-good: #0ca30c;
+
+  /* categorical slots — fixed order, never cycled (dark-validated set) */
+  --series-1: #3987e5;
+  --series-2: #199e70;
+  --series-3: #c98500;
+  --series-4: #008300;
+  --series-5: #9085e9;
+  --series-6: #e66767;
+  --series-7: #d55181;
+  --series-8: #d95926;
+  --series-other: #52514e;
+
+  /* action color (buttons/links) — deeper step of the brand blue for white text */
+  --accent: #2a78d6;
+  --accent-bright: #3987e5;
+
+  --meter-track: #0d366b;
+
+  /* sequential heat scale — near-zero recedes into the dark surface */
+  --heat-0: #232527;
+  --heat-1: #0d366b;
+  --heat-2: #184f95;
+  --heat-3: #1c5cab;
+  --heat-4: #3987e5;
+  --heat-5: #6da7ec;
+  --heat-6: #9ec5f4;
+
+  /* status — reserved meaning, always icon + label */
+  --status-good: #0ca30c;
+  --status-warning: #fab219;
+  --status-serious: #ec835a;
+  --status-critical: #d03b3b;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--page);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  min-height: 100vh;
+}
+
+/* type system: Space Grotesk carries display, JetBrains Mono carries data accents */
+.font-display,
+h1, h2, h3 {
+  font-family: var(--font-display), system-ui, sans-serif;
+  letter-spacing: -0.01em;
+}
+.font-mono-accent {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  letter-spacing: 0.02em;
+}
+
+/* ---------- marquee (echoes the portfolio's ✦ ticker) ---------- */
+.marquee {
+  overflow: hidden;
+  white-space: nowrap;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+}
+.marquee-track {
+  display: inline-block;
+  animation: marquee 30s linear infinite;
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ---------- terminal-style analyzing log ---------- */
+.termline {
+  opacity: 0;
+  animation: term-in 300ms ease forwards;
+}
+@keyframes term-in {
+  from { opacity: 0; transform: translateX(-6px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* ---------- print / recruiter export ---------- */
+@media print {
+  :root {
+    --page: #ffffff;
+    --surface-1: #ffffff;
+    --glass: #ffffff;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #898781;
+    --grid-hairline: #e1e0d9;
+    --axis: #c3c2b7;
+    --border: rgba(11, 11, 11, 0.15);
+    --border-bright: rgba(11, 11, 11, 0.25);
+    --series-1: #2a78d6;
+    --series-2: #1baf7a;
+    --series-3: #eda100;
+    --series-5: #4a3aa7;
+    --meter-track: #cde2fb;
+    --heat-0: #f0efec;
+    --heat-1: #b7d3f6;
+    --heat-2: #9ec5f4;
+    --heat-3: #6da7ec;
+    --heat-4: #3987e5;
+    --heat-5: #256abf;
+    --heat-6: #184f95;
+  }
+  body { background: #fff !important; }
+  .print-hide { display: none !important; }
+  .card {
+    background: #fff;
+    border-color: rgba(11, 11, 11, 0.15);
+    backdrop-filter: none;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+  .text-glow { -webkit-text-fill-color: initial; background: none; color: #0b0b0b; }
+}
+.print-only { display: none; }
+@media print {
+  .print-only { display: block; }
+}
+
+/* ---------- abstract background layer ---------- */
+
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, black 30%, transparent 75%);
+}
+
+.orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  opacity: 0.5;
+  pointer-events: none;
+}
+.orb-blue {
+  background: radial-gradient(circle at 30% 30%, rgba(57, 135, 229, 0.55), transparent 65%);
+}
+.orb-aqua {
+  background: radial-gradient(circle at 60% 40%, rgba(25, 158, 112, 0.4), transparent 65%);
+}
+.orb-violet {
+  background: radial-gradient(circle at 50% 50%, rgba(144, 133, 233, 0.35), transparent 65%);
+}
+
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -24px) scale(1.06); }
+  66% { transform: translate(-24px, 18px) scale(0.97); }
+}
+.animate-drift { animation: drift 18s ease-in-out infinite; }
+.animate-drift-slow { animation: drift 26s ease-in-out infinite reverse; }
+
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow { animation: spin-slow 40s linear infinite; }
+
+/* ---------- surfaces & motion ---------- */
+
+.card {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: border-color 200ms ease, transform 200ms ease, box-shadow 200ms ease;
+}
+.card-hover:hover {
+  border-color: var(--border-bright);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px -18px rgba(57, 135, 229, 0.35);
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.reveal {
+  animation: fade-up 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .animate-drift, .animate-drift-slow, .animate-spin-slow {
+    animation: none;
+  }
+  .card, .card-hover:hover {
+    transition: none;
+    transform: none;
+  }
+}
+
+.btn-accent {
+  background: var(--accent);
+  color: #ffffff;
+  border-radius: 12px;
+  font-weight: 500;
+  transition: background 150ms ease, transform 150ms ease;
+}
+.btn-accent:hover:not(:disabled) {
+  background: var(--accent-bright);
+  transform: translateY(-1px);
+}
+.btn-ghost {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  transition: border-color 150ms ease, color 150ms ease;
+}
+.btn-ghost:hover {
+  border-color: var(--border-bright);
+  color: var(--text-primary);
+}
+
+.input-dark {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: rgba(13, 13, 13, 0.6);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text-primary);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+select.input-dark {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23898781' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 30px;
+}
+/* keep Chrome autofill from painting inputs white */
+.input-dark:-webkit-autofill,
+.input-dark:-webkit-autofill:hover,
+.input-dark:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #141413 inset;
+  -webkit-text-fill-color: var(--text-primary);
+  caret-color: var(--text-primary);
+}
+.input-dark:focus {
+  outline: none;
+  border-color: var(--accent-bright);
+  box-shadow: 0 0 0 3px rgba(57, 135, 229, 0.2);
+}
+.input-dark::placeholder {
+  color: var(--text-muted);
+}
+
+/* gradient headline text */
+.text-glow {
+  background: linear-gradient(100deg, #ffffff 20%, #9ec5f4 55%, #6da7ec 80%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* divide-y separators use the hairline token, not Tailwind's default */
+.divide-y > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--grid-hairline);
+}
+
+/* tabular figures only where numbers must align vertically */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* recharts chrome — recessive, solid hairlines */
+.recharts-cartesian-axis-tick text {
+  fill: var(--text-muted);
+  font-size: 11px;
+}
+.recharts-tooltip-wrapper {
+  outline: none;
+}
