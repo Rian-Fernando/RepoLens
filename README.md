@@ -22,6 +22,7 @@ Every layer has a $0 path:
 | Data | GitHub REST API — 60 req/hour unauthenticated (~1 analysis), optional user-supplied token for 5,000/hour |
 | AI | Gemini API free tier (~1,500 req/day, no credit card) via `GEMINI_API_KEY` |
 | AI fallback | A built-in rules engine produces the full report when no key is set or the quota is hit — the app never breaks and never bills |
+| Benchmarks | Neon Postgres free tier (optional `DATABASE_URL`) for percentiles, leaderboard, history |
 
 ## Run it locally
 

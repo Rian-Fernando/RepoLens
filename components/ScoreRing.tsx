@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { getTier } from "@/lib/tiers";
 
 /** Animated hero score: count-up number inside a ring that fills to score/100. */
 export default function ScoreRing({ score, size = 148 }: { score: number; size?: number }) {
+  const tier = getTier(score);
   const [display, setDisplay] = useState(0);
   const [mounted, setMounted] = useState(false);
   const raf = useRef<number>(0);
@@ -40,7 +42,7 @@ export default function ScoreRing({ score, size = 148 }: { score: number; size?:
           cy={size / 2}
           r={r}
           fill="none"
-          stroke="var(--series-1)"
+          stroke={tier.css}
           strokeWidth="7"
           strokeLinecap="round"
           strokeDasharray={c}
@@ -49,7 +51,7 @@ export default function ScoreRing({ score, size = 148 }: { score: number; size?:
         />
       </svg>
       <div className="absolute text-center">
-        <div className="text-4xl font-semibold leading-none">{display}</div>
+        <div className="font-mono-accent text-4xl font-bold leading-none">{display}</div>
         <div className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
           / 100
         </div>

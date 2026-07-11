@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { collect, GitHubError } from "@/lib/github";
 import { analyze } from "@/lib/analyze";
+import { getBench, recordScore } from "@/lib/db";
 
 export const maxDuration = 60;
 
@@ -26,7 +27,11 @@ export async function POST(req: NextRequest) {
         { status: 422 },
       );
     }
-    return NextResponse.json(analyze(collected));
+    const result = analyze(collected);
+    // score DB is optional — both calls no-op without DATABASE_URL
+    await recordScore(result.profile.login, result.overallScore);
+    result.bench = await getBench(result.profile.login, result.overallScore);
+    return NextResponse.json(result);
   } catch (e) {
     if (e instanceof GitHubError) {
       return NextResponse.json({ error: e.message }, { status: e.status });

@@ -6,6 +6,7 @@ import "ldrs/react/Ring2.css";
 import type { Analysis, Suggestions } from "@/lib/types";
 import { ROLES, type RoleId } from "@/lib/roles";
 import { estimatePercentile } from "@/lib/percentile";
+import { getTier } from "@/lib/tiers";
 import StatTile, { formatCompact } from "@/components/StatTile";
 import LanguageDonut from "@/components/LanguageDonut";
 import CommitHabits from "@/components/CommitHabits";
@@ -18,6 +19,8 @@ import CopyButton from "@/components/CopyButton";
 import HeroTitle from "@/components/HeroTitle";
 import Marquee from "@/components/Marquee";
 import AnalyzingLog from "@/components/AnalyzingLog";
+import RoleRadar from "@/components/RoleRadar";
+import Sparkline from "@/components/Sparkline";
 
 type Phase = "idle" | "analyzing" | "done";
 
@@ -114,6 +117,7 @@ export default function Analyzer({
     ? `[![RepoLens score](${origin}/api/badge/${analysis.profile.login})](${shareUrl})`
     : "";
   const percentile = analysis ? estimatePercentile(analysis.overallScore) : 0;
+  const tier = getTier(analysis?.overallScore ?? 0);
 
   return (
     <div className="space-y-8">
@@ -270,9 +274,27 @@ export default function Analyzer({
               <div className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
                 Portfolio score
               </div>
-              <div className="font-mono-accent text-[11px] mt-0.5" style={{ color: "var(--text-muted)" }}>
-                {percentile >= 50 ? `top ~${100 - percentile}%` : `better than ~${percentile}%`} · estimated
+              <div className="mt-1.5">
+                <span
+                  className="font-mono-accent text-[10px] font-bold tracking-[0.14em] rounded-full px-2.5 py-1 border"
+                  style={{ color: tier.css, borderColor: tier.css }}
+                >
+                  {tier.label}
+                </span>
               </div>
+              <div className="font-mono-accent text-[11px] mt-2" style={{ color: "var(--text-muted)" }}>
+                {analysis.bench?.percentile != null
+                  ? `better than ${analysis.bench.percentile}% of ${analysis.bench.sample} analyzed`
+                  : `${percentile >= 50 ? `top ~${100 - percentile}%` : `better than ~${percentile}%`} · estimated`}
+              </div>
+              {analysis.bench && analysis.bench.history.length >= 2 ? (
+                <div className="mt-2 flex flex-col items-center gap-0.5">
+                  <Sparkline points={analysis.bench.history.map((h) => h.score)} />
+                  <span className="font-mono-accent text-[10px]" style={{ color: "var(--text-muted)" }}>
+                    score history
+                  </span>
+                </div>
+              ) : null}
             </div>
           </section>
 
@@ -317,8 +339,11 @@ export default function Analyzer({
               <RepoQuality repos={analysis.repos} login={analysis.profile.login} />
             </div>
             <div className="card card-hover p-5 lg:col-span-2">
-              <SectionLabel n="04" title="Portfolio coverage" />
-              <GapsPanel gaps={analysis.gaps} />
+              <SectionLabel n="04" title="Role fit & coverage" />
+              <RoleRadar analysis={analysis} role={role} />
+              <div className="mt-4 pt-4 border-t" style={{ borderColor: "var(--grid-hairline)" }}>
+                <GapsPanel gaps={analysis.gaps} />
+              </div>
             </div>
           </section>
 

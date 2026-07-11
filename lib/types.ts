@@ -57,7 +57,15 @@ export interface GapItem {
   severity: GapSeverity;
 }
 
+export interface Bench {
+  percentile: number | null;
+  sample: number;
+  history: Array<{ date: string; score: number }>;
+}
+
 export interface Analysis {
+  /** Real benchmarking data when the score DB is configured; null otherwise. */
+  bench?: Bench | null;
   profile: ProfileSummary;
   totals: {
     publicRepos: number;

@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Manrope, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Background from "@/components/Background";
+import Logo from "@/components/Logo";
 import { PORTFOLIO_LABEL, PORTFOLIO_URL, SITE_NAME, SITE_TAGLINE } from "@/lib/site";
 
-const display = Space_Grotesk({ subsets: ["latin"], variable: "--font-display" });
-const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", weight: ["400", "500"] });
+const display = Manrope({ subsets: ["latin"], variable: "--font-display", weight: ["400", "500", "700", "800"] });
+const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", weight: ["400", "500", "700"] });
 
 export const metadata: Metadata = {
   title: `${SITE_NAME} — ${SITE_TAGLINE}`,
@@ -20,21 +21,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Background />
         <header
           className="sticky top-0 z-20 border-b backdrop-blur-md print-hide"
-          style={{ borderColor: "var(--border)", background: "rgba(13,13,13,0.72)" }}
+          style={{ borderColor: "var(--border)", background: "rgba(13,17,23,0.72)" }}
         >
           <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-4">
-            <a href="/" className="flex items-center gap-2.5 shrink-0 group">
-              <span
-                aria-hidden
-                className="inline-flex h-6 w-6 rounded-lg items-center justify-center transition-transform group-hover:rotate-12"
-                style={{ background: "var(--accent)" }}
-              >
-                <svg viewBox="0 0 32 32" className="h-4 w-4" fill="none">
-                  <circle cx="14.5" cy="14.5" r="6.5" stroke="#fff" strokeWidth="3" />
-                  <line x1="19.5" y1="19.5" x2="25" y2="25" stroke="#fff" strokeWidth="3" strokeLinecap="round" />
-                </svg>
-              </span>
-              <span className="text-lg font-semibold tracking-tight font-display">{SITE_NAME}</span>
+            <a href="/" className="shrink-0 transition-opacity hover:opacity-80">
+              <Logo />
             </a>
             <nav className="flex items-center gap-5 text-sm">
               <a href="/" className="hover:text-white transition-colors" style={{ color: "var(--text-secondary)" }}>
@@ -42,6 +33,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </a>
               <a href="/compare" className="hover:text-white transition-colors" style={{ color: "var(--text-secondary)" }}>
                 Compare
+              </a>
+              <a href="/leaderboard" className="hover:text-white transition-colors" style={{ color: "var(--text-secondary)" }}>
+                Leaderboard
               </a>
               <a href="/action" className="hover:text-white transition-colors" style={{ color: "var(--text-secondary)" }}>
                 CI Action

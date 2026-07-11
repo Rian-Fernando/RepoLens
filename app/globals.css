@@ -6,14 +6,14 @@
  * charts reference roles (var(--series-N)), never raw hex.
  */
 :root {
-  --page: #0d0d0d;
-  --surface-1: #1a1a19;
-  --glass: rgba(26, 26, 25, 0.66);
+  --page: #0d1117;
+  --surface-1: #161b22;
+  --glass: rgba(22, 27, 34, 0.66);
   --text-primary: #ffffff;
-  --text-secondary: #c3c2b7;
-  --text-muted: #898781;
-  --grid-hairline: #2c2c2a;
-  --axis: #383835;
+  --text-secondary: #b8c0cc;
+  --text-muted: #8b949e;
+  --grid-hairline: #21262d;
+  --axis: #30363d;
   --border: rgba(255, 255, 255, 0.1);
   --border-bright: rgba(255, 255, 255, 0.18);
   --delta-good: #0ca30c;
@@ -29,9 +29,17 @@
   --series-8: #d95926;
   --series-other: #52514e;
 
-  /* action color (buttons/links) — deeper step of the brand blue for white text */
+  /* brand accents (handoff): blue + violet share chroma/lightness */
+  --brand-blue: #79b8ff;
+  --brand-violet: #a78bfa;
+  --brand-gradient: linear-gradient(135deg, #79b8ff, #a78bfa);
   --accent: #2a78d6;
   --accent-bright: #3987e5;
+
+  /* score tiers (handoff): high / mid / low */
+  --tier-high: oklch(72% 0.17 145);
+  --tier-mid: oklch(78% 0.17 95);
+  --tier-low: oklch(68% 0.19 25);
 
   --meter-track: #0d366b;
 
@@ -58,7 +66,7 @@ html {
 body {
   background: var(--page);
   color: var(--text-primary);
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-display), system-ui, -apple-system, "Segoe UI", sans-serif;
   min-height: 100vh;
 }
 
@@ -108,7 +116,7 @@ h1, h2, h3 {
     --glass: #ffffff;
     --text-primary: #0b0b0b;
     --text-secondary: #52514e;
-    --text-muted: #898781;
+    --text-muted: #8b949e;
     --grid-hairline: #e1e0d9;
     --axis: #c3c2b7;
     --border: rgba(11, 11, 11, 0.15);
@@ -166,7 +174,7 @@ h1, h2, h3 {
   background: radial-gradient(circle at 60% 40%, rgba(25, 158, 112, 0.4), transparent 65%);
 }
 .orb-violet {
-  background: radial-gradient(circle at 50% 50%, rgba(144, 133, 233, 0.35), transparent 65%);
+  background: radial-gradient(circle at 50% 50%, rgba(167, 139, 250, 0.32), transparent 65%);
 }
 
 @keyframes drift {
@@ -217,14 +225,14 @@ h1, h2, h3 {
 }
 
 .btn-accent {
-  background: var(--accent);
-  color: #ffffff;
+  background: var(--brand-gradient);
+  color: #0d1117;
   border-radius: 12px;
-  font-weight: 500;
-  transition: background 150ms ease, transform 150ms ease;
+  font-weight: 700;
+  transition: filter 150ms ease, transform 150ms ease;
 }
 .btn-accent:hover:not(:disabled) {
-  background: var(--accent-bright);
+  filter: brightness(1.08);
   transform: translateY(-1px);
 }
 .btn-ghost {
@@ -272,7 +280,7 @@ select.input-dark {
 
 /* gradient headline text */
 .text-glow {
-  background: linear-gradient(100deg, #ffffff 20%, #9ec5f4 55%, #6da7ec 80%);
+  background: linear-gradient(135deg, #ffffff 15%, #79b8ff 55%, #a78bfa 90%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
