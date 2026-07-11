@@ -5,6 +5,7 @@ import { SITE_NAME } from "@/lib/site";
 export const metadata: Metadata = {
   title: `Compare — ${SITE_NAME}`,
   description: "Head-to-head GitHub portfolio comparison: scores, stars, activity, and quality.",
+  alternates: { canonical: "/compare" },
 };
 
 export default async function ComparePage({

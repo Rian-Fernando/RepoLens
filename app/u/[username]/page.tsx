@@ -14,6 +14,7 @@ export async function generateMetadata({
     title: `${username} — ${SITE_NAME} report`,
     description: `GitHub portfolio analysis for ${username}: languages, commit habits, repo quality, and the 5 projects to build next.`,
     twitter: { card: "summary_large_image" },
+    alternates: { canonical: `/u/${username}` },
   };
 }
 

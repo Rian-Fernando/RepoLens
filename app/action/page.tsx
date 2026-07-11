@@ -5,6 +5,7 @@ import { SITE_NAME } from "@/lib/site";
 export const metadata: Metadata = {
   title: `CI Action — ${SITE_NAME}`,
   description: "Guard your GitHub portfolio quality in CI: fail the build when your RepoLens score drops.",
+  alternates: { canonical: "/action" },
 };
 
 const APP_URL = "https://repolens.rianfernando.com";

@@ -3,15 +3,24 @@ import { Manrope, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Background from "@/components/Background";
 import Logo from "@/components/Logo";
-import { PORTFOLIO_LABEL, PORTFOLIO_URL, SITE_NAME, SITE_TAGLINE } from "@/lib/site";
+import { PORTFOLIO_LABEL, PORTFOLIO_URL, SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
 
 const display = Manrope({ subsets: ["latin"], variable: "--font-display", weight: ["400", "500", "700", "800"] });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", weight: ["400", "500", "700"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: `${SITE_NAME} — ${SITE_TAGLINE}`,
   description:
     "Score any GitHub profile — languages, commit habits, repo and README quality — get role-targeted fixes, a README badge, CI checks, and the 5 projects to build next. Free forever.",
+  openGraph: {
+    siteName: SITE_NAME,
+    type: "website",
+    url: SITE_URL,
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

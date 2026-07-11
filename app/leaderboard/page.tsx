@@ -6,6 +6,7 @@ import { SITE_NAME } from "@/lib/site";
 export const metadata: Metadata = {
   title: `Leaderboard — ${SITE_NAME}`,
   description: "Top-scoring GitHub portfolios analyzed by RepoLens.",
+  alternates: { canonical: "/leaderboard" },
 };
 
 export const revalidate = 300;
