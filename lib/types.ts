@@ -23,6 +23,15 @@ export interface CommitHabits {
   lastCommitAt: string | null;
   busiestDay: string | null;
   busiestHourUtc: number | null;
+  /** commit-message craft, 0-100 (null when no messages sampled) */
+  messageScore: number | null;
+  messageFindings: string[];
+}
+
+export interface CollabStats {
+  mergedPrsElsewhere: number | null;
+  issuesElsewhere: number | null;
+  reviewsElsewhere: number | null;
 }
 
 export interface RepoScoreDetail {
@@ -78,6 +87,8 @@ export interface Analysis {
   };
   languages: LanguageSlice[];
   commits: CommitHabits;
+  collab?: CollabStats;
+  hasProfileReadme?: boolean;
   repos: RepoAnalysis[];
   gaps: GapItem[];
   overallScore: number; // 0-100

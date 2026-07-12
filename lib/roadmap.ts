@@ -4,8 +4,9 @@ import type { Analysis, RoadmapItem } from "./types";
  * Turns the analysis into a checklist of fixes, each with the overall-score
  * gain it would produce — computed from the real scoring weights, not vibes.
  *
- * Overall score = avg repo quality × 0.5 + activity(20) + breadth(10) + coverage(20).
- * So recovering X quality points on one repo lifts the overall score by X / n × 0.5.
+ * Overall score = avg repo quality × 0.45 + activity(15) + breadth(10) +
+ * coverage(15) + collaboration(10) + commit craft(5). Recovering X quality
+ * points on one repo lifts the overall score by X / n × 0.45.
  */
 
 const ACTIONS: Array<{
@@ -71,7 +72,7 @@ export function buildRoadmap(a: Analysis): RoadmapItem[] {
       }
     }
     if (missing > 0) {
-      const gain = Math.round((missing / n) * 0.5 * 10) / 10;
+      const gain = Math.round((missing / n) * 0.45 * 10) / 10;
       if (gain >= 0.5) {
         items.push({ id: action.id, title: action.title(repos.length), detail: action.detail, gain, repos });
       }
@@ -80,7 +81,7 @@ export function buildRoadmap(a: Analysis): RoadmapItem[] {
 
   // Coverage gaps that aren't already implied by a repo-level action above
   const repoActionGapIds = new Set(["license", "readme", "demo"]);
-  const gapShare = Math.round((20 / Math.max(1, a.gaps.length)) * 10) / 10;
+  const gapShare = Math.round((15 / Math.max(1, a.gaps.length)) * 10) / 10;
   for (const gap of a.gaps) {
     if (gap.severity === "good" || repoActionGapIds.has(gap.id)) continue;
     items.push({

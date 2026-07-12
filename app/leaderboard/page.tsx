@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getLeaderboard } from "@/lib/db";
+import { getLeaderboard, getLeaderboardLanguages } from "@/lib/db";
 import { getTier } from "@/lib/tiers";
 import { SITE_NAME } from "@/lib/site";
 
@@ -11,8 +11,13 @@ export const metadata: Metadata = {
 
 export const revalidate = 300;
 
-export default async function LeaderboardPage() {
-  const rows = await getLeaderboard(50);
+export default async function LeaderboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string }>;
+}) {
+  const { lang } = await searchParams;
+  const [rows, languages] = await Promise.all([getLeaderboard(50, lang), getLeaderboardLanguages()]);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
@@ -25,6 +30,34 @@ export default async function LeaderboardPage() {
           The highest-scoring portfolios analyzed so far. Analyze yours to claim a spot.
         </p>
       </div>
+
+      {languages.length > 0 ? (
+        <div className="flex flex-wrap justify-center gap-2 mb-6 reveal">
+          <a
+            href="/leaderboard"
+            className={`font-mono-accent text-xs rounded-full border px-3 py-1.5 transition-colors ${!lang ? "" : "hover:text-white"}`}
+            style={{
+              borderColor: !lang ? "var(--brand-blue)" : "var(--border)",
+              color: !lang ? "var(--brand-blue)" : "var(--text-muted)",
+            }}
+          >
+            all
+          </a>
+          {languages.map((l) => (
+            <a
+              key={l}
+              href={`/leaderboard?lang=${encodeURIComponent(l)}`}
+              className="font-mono-accent text-xs rounded-full border px-3 py-1.5 transition-colors hover:text-white"
+              style={{
+                borderColor: lang === l ? "var(--brand-blue)" : "var(--border)",
+                color: lang === l ? "var(--brand-blue)" : "var(--text-muted)",
+              }}
+            >
+              {l.toLowerCase()}
+            </a>
+          ))}
+        </div>
+      ) : null}
 
       {rows === null ? (
         <div className="card p-6 text-center text-sm reveal" style={{ color: "var(--text-secondary)" }}>

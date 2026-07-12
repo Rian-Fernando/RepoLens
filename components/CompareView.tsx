@@ -37,7 +37,7 @@ const ROWS: Row[] = [
     value: (a) => a.repos.filter((r) => (r.readmeScore ?? 0) >= 50).length,
     format: (n) => `${n}`,
   },
-  { label: "Coverage areas hit", value: (a) => a.gaps.filter((g) => g.severity === "good").length, format: (n) => `${n}/8` },
+  { label: "Coverage areas hit", value: (a) => a.gaps.filter((g) => g.severity === "good").length, format: (n) => `${n}` },
 ];
 
 function Corner({ a }: { a: Analysis }) {

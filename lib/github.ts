@@ -36,7 +36,7 @@ interface GhRepo {
 }
 
 interface GhCommit {
-  commit: { author: { date: string } | null };
+  commit: { author: { date: string } | null; message: string };
 }
 
 export interface GhUser {
@@ -54,13 +54,21 @@ export interface CollectedRepo {
   repo: GhRepo;
   languages: Record<string, number>;
   readme: string | null;
-  commitDates: string[];
+  commitSamples: Array<{ date: string; message: string }>;
+}
+
+export interface Collab {
+  mergedPrsElsewhere: number | null;
+  issuesElsewhere: number | null;
+  reviewsElsewhere: number | null;
 }
 
 export interface Collected {
   user: GhUser;
   allRepos: GhRepo[];
   deepDive: CollectedRepo[];
+  hasProfileReadme: boolean;
+  collab: Collab;
 }
 
 function headers(token?: string, raw = false): HeadersInit {
@@ -138,12 +146,48 @@ export async function collect(username: string, token?: string): Promise<Collect
         repo,
         languages,
         readme,
-        commitDates: commits
-          .map((c) => c.commit.author?.date)
-          .filter((d): d is string => Boolean(d)),
+        commitSamples: commits
+          .filter((c) => c.commit.author?.date)
+          .map((c) => ({ date: c.commit.author!.date, message: c.commit.message ?? "" })),
       };
     }),
   );
 
-  return { user, allRepos: repos, deepDive };
+  // profile README (username/username) — the most-viewed file on any profile
+  const hasProfileReadme = await gh<string>(
+    `/repos/${encodeURIComponent(username)}/${encodeURIComponent(username)}/readme`,
+    token,
+    true,
+  )
+    .then((text) => text.trim().length > 100)
+    .catch(() => false);
+
+  // collaboration beyond own repos — the strongest hiring signal on GitHub.
+  // Search API totals only (per_page=1); each null means "couldn't measure".
+  const searchCount = async (q: string): Promise<number | null> => {
+    try {
+      const res = await fetch(`${API}/search/issues?q=${encodeURIComponent(q)}&per_page=1`, {
+        headers: headers(token),
+        next: { revalidate: 3600 },
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return typeof data.total_count === "number" ? data.total_count : null;
+    } catch {
+      return null;
+    }
+  };
+  const [mergedPrsElsewhere, issuesElsewhere, reviewsElsewhere] = await Promise.all([
+    searchCount(`author:${username} type:pr is:merged -user:${username}`),
+    searchCount(`author:${username} type:issue -user:${username}`),
+    searchCount(`reviewed-by:${username} type:pr -author:${username}`),
+  ]);
+
+  return {
+    user,
+    allRepos: repos,
+    deepDive,
+    hasProfileReadme,
+    collab: { mergedPrsElsewhere, issuesElsewhere, reviewsElsewhere },
+  };
 }

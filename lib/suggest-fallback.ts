@@ -97,6 +97,28 @@ const TEMPLATES: Template[] = [
     stack: () => ["Markdown", "A screenshot tool"],
   },
   {
+    id: "profile-readme",
+    gap: "profile-readme",
+    name: "Profile README glow-up",
+    tagline: "The most-viewed page on your GitHub is currently blank.",
+    description:
+      "Create the username/username repo with a README: who you are, what you build, your 3 best projects with links, and your RepoLens badge. Treat it like a landing page, not a bio.",
+    skills: ["Personal branding", "Markdown"],
+    difficulty: "beginner",
+    stack: () => ["Markdown", "shields.io badges"],
+  },
+  {
+    id: "collab",
+    gap: "collab",
+    name: "First upstream contribution",
+    tagline: "One merged PR in a real project outranks ten solo repos.",
+    description:
+      "Pick a tool you actually use, find a good-first-issue or fix a docs gap you've personally hit, and get one PR merged. Then do it again. Collaboration is the strongest signal recruiters can't fake-check.",
+    skills: ["OSS collaboration", "Code review", "Communication"],
+    difficulty: "intermediate",
+    stack: (l) => [l, "GitHub flow"],
+  },
+  {
     id: "oss",
     gap: "license",
     name: "Open-source hygiene pass",

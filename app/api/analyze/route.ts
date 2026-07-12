@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     }
     const result = analyze(collected);
     // score DB + cache are optional — all no-op without DATABASE_URL
-    await recordScore(result.profile.login, result.overallScore);
+    await recordScore(result.profile.login, result.overallScore, result.languages[0]?.name ?? null);
     await setCachedAnalysis(result.profile.login, result);
     result.bench = await getBench(result.profile.login, result.overallScore);
     return NextResponse.json(result);

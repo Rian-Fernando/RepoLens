@@ -45,6 +45,32 @@ function aggregateLanguages(deepDive: CollectedRepo[]): LanguageSlice[] {
 
 // ---------- commit habits ----------
 
+const JUNK_MSG = /^(fix|fixes|fixed|wip|update|updates|updated|test|testing|asdf+|minor|change|changes|stuff|misc|\.+|final|done|commit)[.!]?$/i;
+const CONVENTIONAL = /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?!?:\s/;
+
+/** Commit-message craft: descriptive beats terse, conventional prefixes get a bonus. */
+function scoreMessages(messages: string[]): { score: number | null; findings: string[] } {
+  const sample = messages.map((m) => m.split("\n")[0].trim()).filter(Boolean);
+  if (sample.length < 5) return { score: null, findings: [] };
+  const junk = sample.filter((m) => JUNK_MSG.test(m)).length / sample.length;
+  const short = sample.filter((m) => m.length < 10).length / sample.length;
+  const conventional = sample.filter((m) => CONVENTIONAL.test(m)).length / sample.length;
+  const avgLen = sample.reduce((a, m) => a + Math.min(m.length, 72), 0) / sample.length;
+
+  let score = 50;
+  score += Math.min(20, (avgLen - 15) * 0.8); // descriptive length up to +20
+  score -= junk * 40; // "wip"/"fix" spam up to -40
+  score -= short * 20;
+  score += conventional * 20; // conventional-commit discipline up to +20
+  score = Math.round(Math.max(0, Math.min(100, score)));
+
+  const findings: string[] = [];
+  if (junk > 0.25) findings.push(`${Math.round(junk * 100)}% one-word messages ("fix", "wip"…)`);
+  if (short > 0.4) findings.push("many messages under 10 characters");
+  if (conventional > 0.4) findings.push("uses conventional commits");
+  return { score, findings };
+}
+
 function commitHabits(deepDive: CollectedRepo[]): CommitHabits {
   const byDay = new Array<number>(7).fill(0);
   const byDayHour: number[][] = Array.from({ length: 7 }, () => new Array<number>(24).fill(0));
@@ -53,8 +79,8 @@ function commitHabits(deepDive: CollectedRepo[]): CommitHabits {
   let latest: string | null = null;
   const cutoff = Date.now() - NINETY_DAYS_MS;
 
-  for (const { commitDates } of deepDive) {
-    for (const iso of commitDates) {
+  for (const { commitSamples } of deepDive) {
+    for (const { date: iso } of commitSamples) {
       const t = Date.parse(iso);
       if (Number.isNaN(t)) continue;
       const d = new Date(t);
@@ -80,7 +106,11 @@ function commitHabits(deepDive: CollectedRepo[]): CommitHabits {
     busiestHourUtc = byHour.indexOf(Math.max(...byHour));
   }
 
-  return { totalSampled: total, byDay, byDayHour, last90Days: last90, lastCommitAt: latest, busiestDay, busiestHourUtc };
+  const { score: messageScore, findings: messageFindings } = scoreMessages(
+    deepDive.flatMap((d) => d.commitSamples.map((c) => c.message)),
+  );
+
+  return { totalSampled: total, byDay, byDayHour, last90Days: last90, lastCommitAt: latest, busiestDay, busiestHourUtc, messageScore, messageFindings };
 }
 
 // ---------- README scoring ----------
@@ -237,6 +267,20 @@ function detectGaps(collected: Collected, repos: RepoAnalysis[]): GapItem[] {
     "No data/AI project detected — a small applied-AI project rounds out a modern portfolio.",
   );
   push(
+    "profile-readme",
+    collected.hasProfileReadme,
+    "Profile README",
+    "Your username/username profile README exists.",
+    "No profile README — it's the most-viewed page on your GitHub. Create a username/username repo with a README.",
+  );
+  push(
+    "collab",
+    (collected.collab.mergedPrsElsewhere ?? 0) >= 1,
+    "Open-source collaboration",
+    "You have merged PRs in other people's projects.",
+    "No merged PRs outside your own repos — one upstream contribution carries outsized hiring weight.",
+  );
+  push(
     "license",
     repos.some((r) => r.hasLicense),
     "Open-source hygiene",
@@ -249,20 +293,38 @@ function detectGaps(collected: Collected, repos: RepoAnalysis[]): GapItem[] {
 
 // ---------- overall score ----------
 
-function overall(repos: RepoAnalysis[], commits: CommitHabits, languages: LanguageSlice[], gaps: GapItem[]): { score: number; parts: RepoScoreDetail[] } {
+function overall(
+  repos: RepoAnalysis[],
+  commits: CommitHabits,
+  languages: LanguageSlice[],
+  gaps: GapItem[],
+  collab: Collected["collab"],
+): { score: number; parts: RepoScoreDetail[] } {
   const parts: RepoScoreDetail[] = [];
   const avgQuality =
     repos.length > 0 ? repos.reduce((a, r) => a + r.qualityScore, 0) / repos.length : 0;
-  parts.push({ label: "Repo quality (avg)", earned: Math.round((avgQuality / 100) * 50), max: 50 });
+  parts.push({ label: "Repo quality (avg)", earned: Math.round((avgQuality / 100) * 45), max: 45 });
 
   const activity = Math.min(1, commits.last90Days / 60);
-  parts.push({ label: "Recent activity", earned: Math.round(activity * 20), max: 20 });
+  parts.push({ label: "Recent activity", earned: Math.round(activity * 15), max: 15 });
 
   const breadth = Math.min(1, languages.filter((l) => l.name !== "Other").length / 4);
   parts.push({ label: "Language breadth", earned: Math.round(breadth * 10), max: 10 });
 
   const covered = gaps.filter((g) => g.severity === "good").length;
-  parts.push({ label: "Portfolio coverage", earned: Math.round((covered / Math.max(1, gaps.length)) * 20), max: 20 });
+  parts.push({ label: "Portfolio coverage", earned: Math.round((covered / Math.max(1, gaps.length)) * 15), max: 15 });
+
+  // collaboration: merged PRs elsewhere carry most weight, reviews next
+  const merged = collab.mergedPrsElsewhere ?? 0;
+  const reviews = collab.reviewsElsewhere ?? 0;
+  const collabScore = Math.min(1, merged / 5) * 0.7 + Math.min(1, reviews / 5) * 0.3;
+  parts.push({ label: "Collaboration", earned: Math.round(collabScore * 10), max: 10 });
+
+  parts.push({
+    label: "Commit craft",
+    earned: Math.round(((commits.messageScore ?? 50) / 100) * 5),
+    max: 5,
+  });
 
   return { score: parts.reduce((a, p) => a + p.earned, 0), parts };
 }
@@ -274,7 +336,7 @@ export function analyze(collected: Collected): Analysis {
   const languages = aggregateLanguages(collected.deepDive);
   const commits = commitHabits(collected.deepDive);
   const gaps = detectGaps(collected, repos);
-  const { score, parts } = overall(repos, commits, languages, gaps);
+  const { score, parts } = overall(repos, commits, languages, gaps, collected.collab);
 
   return {
     profile: {
@@ -295,6 +357,8 @@ export function analyze(collected: Collected): Analysis {
     },
     languages,
     commits,
+    collab: collected.collab,
+    hasProfileReadme: collected.hasProfileReadme,
     repos,
     gaps,
     overallScore: score,

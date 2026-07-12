@@ -124,7 +124,7 @@ export default function CommitHabits({ habits }: { habits: Habits }) {
           {hovered
             ? `${DAY_SHORT[hovered.day]} ${hovered.hour}:00 UTC — ${hovered.count} commit${hovered.count === 1 ? "" : "s"}`
             : habits.busiestDay
-              ? `Peak: ${habits.busiestDay}${habits.busiestHourUtc !== null ? ` around ${habits.busiestHourUtc}:00 UTC` : ""} · ${habits.last90Days} commits in the last 90 days`
+              ? `Peak: ${habits.busiestDay}${habits.busiestHourUtc !== null ? ` around ${habits.busiestHourUtc}:00 UTC` : ""} · ${habits.last90Days} commits in the last 90 days${habits.messageScore != null ? ` · message craft ${habits.messageScore}/100` : ""}`
               : ""}
         </p>
       </div>

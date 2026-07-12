@@ -22,6 +22,8 @@ import AnalyzingLog from "@/components/AnalyzingLog";
 import RoleRadar from "@/components/RoleRadar";
 import Sparkline from "@/components/Sparkline";
 import ScoreHistory from "@/components/ScoreHistory";
+import WatchButton from "@/components/WatchButton";
+import GoalChip from "@/components/GoalChip";
 import { buildMarkdownReport } from "@/lib/markdown";
 
 type Phase = "idle" | "analyzing" | "done";
@@ -67,16 +69,17 @@ export default function Analyzer({
   const [suggestError, setSuggestError] = useState<string | null>(null);
   const [suggestLoading, setSuggestLoading] = useState(false);
   const [origin, setOrigin] = useState("");
+  const [style, setStyle] = useState<"coach" | "roast">("coach");
   const autoranRef = useRef(false);
 
   useEffect(() => setOrigin(window.location.origin), []);
 
-  const fetchSuggestions = useCallback(async (a: Analysis, r: RoleId) => {
+  const fetchSuggestions = useCallback(async (a: Analysis, r: RoleId, style: "coach" | "roast" = "coach") => {
     setSuggestLoading(true);
     setSuggestError(null);
     setSuggestions(null);
     try {
-      setSuggestions(await postJson<Suggestions>("/api/suggest", { analysis: a, role: r }));
+      setSuggestions(await postJson<Suggestions>("/api/suggest", { analysis: a, role: r, style }));
     } catch (e) {
       setSuggestError(e instanceof Error ? e.message : "Suggestions failed.");
     } finally {
@@ -167,7 +170,7 @@ export default function Analyzer({
               onChange={(e) => {
                 const r = e.target.value as RoleId;
                 setRole(r);
-                if (analysis) void fetchSuggestions(analysis, r);
+                if (analysis) void fetchSuggestions(analysis, r, style);
               }}
               aria-label="Target role"
               className="input-dark px-3 py-2.5 text-sm cursor-pointer"
@@ -276,6 +279,11 @@ export default function Analyzer({
                     ⎙ Export PDF
                   </button>
                   <CopyButton text={buildMarkdownReport(analysis, suggestions)} label="Copy as Markdown" />
+                  <CopyButton
+                    text={`<iframe src="${origin}/api/embed/${analysis.profile.login}" width="360" height="120" style="border:0" title="RepoLens score"></iframe>`}
+                    label="Copy embed"
+                  />
+                  <WatchButton login={analysis.profile.login} />
                 </div>
               </div>
             </div>
@@ -297,6 +305,7 @@ export default function Analyzer({
                   ? `better than ${analysis.bench.percentile}% of ${analysis.bench.sample} analyzed`
                   : `${percentile >= 50 ? `top ~${100 - percentile}%` : `better than ~${percentile}%`} · estimated`}
               </div>
+              <div><GoalChip login={analysis.profile.login} score={analysis.overallScore} /></div>
               {analysis.bench && analysis.bench.history.length >= 2 ? (
                 <div className="mt-2 flex flex-col items-center gap-0.5">
                   <Sparkline points={analysis.bench.history.map((h) => h.score)} />
@@ -372,7 +381,35 @@ export default function Analyzer({
 
           {/* AI suggestions */}
           <section className="card p-5 reveal" style={{ animationDelay: "280ms" }}>
-            <SectionLabel n="06" title={`The review — tuned for ${ROLES.find((r) => r.id === role)?.label}`} />
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <SectionLabel n="06" title={`The review — tuned for ${ROLES.find((r) => r.id === role)?.label}`} />
+              <div className="flex gap-1.5 -mt-3 print-hide">
+                {(["coach", "roast"] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => {
+                      if (style !== mode) {
+                        setStyle(mode);
+                        void fetchSuggestions(analysis, role, mode);
+                      }
+                    }}
+                    className="font-mono-accent text-[11px] rounded-full border px-3 py-1 cursor-pointer transition-colors"
+                    style={{
+                      borderColor: style === mode ? "var(--brand-blue)" : "var(--border)",
+                      color: style === mode ? "var(--brand-blue)" : "var(--text-muted)",
+                    }}
+                  >
+                    {mode === "coach" ? "coach" : "🔥 roast"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {style === "roast" && suggestions?.engine === "gemini" ? (
+              <p className="font-mono-accent text-[11px] -mt-2 mb-3" style={{ color: "var(--status-serious)" }}>
+                roast mode: same data, less mercy. resume bullets stay serious.
+              </p>
+            ) : null}
             {suggestLoading && (
               <div className="flex items-center gap-3 text-sm" style={{ color: "var(--text-muted)" }}>
                 <Ring2 size="20" stroke="3" speed="0.9" color="#3987e5" />
@@ -384,7 +421,7 @@ export default function Analyzer({
                 <p style={{ color: "var(--status-critical)" }}>{suggestError}</p>
                 <button
                   type="button"
-                  onClick={() => fetchSuggestions(analysis, role)}
+                  onClick={() => fetchSuggestions(analysis, role, style)}
                   className="mt-2 underline cursor-pointer"
                   style={{ color: "var(--series-1)" }}
                 >

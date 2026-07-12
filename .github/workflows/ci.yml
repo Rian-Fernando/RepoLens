@@ -1,0 +1,23 @@
+name: CI
+on: [push, pull_request]
+
+jobs:
+  build-and-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Smoke test
+        run: |
+          npm run start &
+          timeout 30 bash -c 'until curl -sf http://localhost:3000 >/dev/null; do sleep 1; done'
+          curl -sf http://localhost:3000/ > /dev/null && echo "home ok"
+          curl -sf http://localhost:3000/robots.txt | grep -q "sitemap" && echo "robots ok"
+          curl -sf http://localhost:3000/sitemap.xml | grep -q "<loc>" && echo "sitemap ok"
+          curl -sf http://localhost:3000/api/auth/me | grep -q "configured" && echo "auth ok"
+          curl -sf http://localhost:3000/guide > /dev/null && echo "guide ok"

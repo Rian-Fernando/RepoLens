@@ -42,11 +42,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <a href="/" className="hover:text-white transition-colors" style={{ color: "var(--text-secondary)" }}>
                 Analyze
               </a>
+              <a href="/match" className="hover:text-white transition-colors" style={{ color: "var(--text-secondary)" }}>
+                Job match
+              </a>
               <a href="/compare" className="hover:text-white transition-colors" style={{ color: "var(--text-secondary)" }}>
                 Compare
               </a>
               <a href="/leaderboard" className="hover:text-white transition-colors" style={{ color: "var(--text-secondary)" }}>
                 Leaderboard
+              </a>
+              <a href="/org" className="hidden sm:inline hover:text-white transition-colors" style={{ color: "var(--text-secondary)" }}>
+                Cohorts
               </a>
               <a href="/action" className="hover:text-white transition-colors" style={{ color: "var(--text-secondary)" }}>
                 CI Action

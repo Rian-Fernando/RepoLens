@@ -31,11 +31,21 @@ async function ensureSchema(sql: Sql): Promise<void> {
         created_at TIMESTAMPTZ NOT NULL DEFAULT now()
       )`;
     await sql`CREATE INDEX IF NOT EXISTS scores_login_time ON scores (login, created_at DESC)`;
+    await sql`ALTER TABLE scores ADD COLUMN IF NOT EXISTS language TEXT`;
     await sql`
       CREATE TABLE IF NOT EXISTS analyses (
         login TEXT PRIMARY KEY,
         data JSONB NOT NULL,
         created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      )`;
+    await sql`
+      CREATE TABLE IF NOT EXISTS watches (
+        id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+        login TEXT NOT NULL,
+        email TEXT NOT NULL,
+        last_score INT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+        UNIQUE (login, email)
       )`;
   })();
   return schemaReady;
@@ -84,14 +94,14 @@ export async function setCachedAnalysis(login: string, data: unknown): Promise<v
 }
 
 /** Record one analysis result. Throttled to one row per login per hour. */
-export async function recordScore(login: string, score: number): Promise<void> {
+export async function recordScore(login: string, score: number, language: string | null = null): Promise<void> {
   const sql = getSql();
   if (!sql) return;
   try {
     await ensureSchema(sql);
     await sql`
-      INSERT INTO scores (login, score)
-      SELECT ${login.toLowerCase()}, ${score}
+      INSERT INTO scores (login, score, language)
+      SELECT ${login.toLowerCase()}, ${score}, ${language}
       WHERE NOT EXISTS (
         SELECT 1 FROM scores
         WHERE login = ${login.toLowerCase()} AND created_at > now() - interval '1 hour'
@@ -159,27 +169,96 @@ export interface LeaderboardRow {
   login: string;
   score: number;
   analyzedAt: string;
+  language: string | null;
 }
 
-/** Top profiles by latest score. Null when no DB is configured. */
-export async function getLeaderboard(limit = 50): Promise<LeaderboardRow[] | null> {
+/** Top profiles by latest score, optionally within one primary language. */
+export async function getLeaderboard(limit = 50, language?: string): Promise<LeaderboardRow[] | null> {
   const sql = getSql();
   if (!sql) return null;
   try {
     await ensureSchema(sql);
     const rows = (await sql`
-      SELECT DISTINCT ON (login) login, score, to_char(created_at, 'YYYY-MM-DD') AS analyzed_at
+      SELECT DISTINCT ON (login) login, score, language, to_char(created_at, 'YYYY-MM-DD') AS analyzed_at
       FROM scores ORDER BY login, created_at DESC`) as Array<{
       login: string;
       score: number;
+      language: string | null;
       analyzed_at: string;
     }>;
     return rows
+      .filter((r) => !language || r.language === language)
       .sort((a, b) => b.score - a.score)
       .slice(0, limit)
-      .map((r) => ({ login: r.login, score: r.score, analyzedAt: r.analyzed_at }));
+      .map((r) => ({ login: r.login, score: r.score, analyzedAt: r.analyzed_at, language: r.language }));
   } catch (e) {
     console.warn("getLeaderboard failed (non-fatal):", e instanceof Error ? e.message : e);
     return null;
+  }
+}
+
+/** Languages with enough entries to justify a leaderboard tab. */
+export async function getLeaderboardLanguages(min = 5): Promise<string[]> {
+  const sql = getSql();
+  if (!sql) return [];
+  try {
+    await ensureSchema(sql);
+    const rows = (await sql`
+      WITH latest AS (SELECT DISTINCT ON (login) login, language FROM scores ORDER BY login, created_at DESC)
+      SELECT language, count(*)::int AS n FROM latest
+      WHERE language IS NOT NULL GROUP BY language HAVING count(*) >= ${min}
+      ORDER BY n DESC LIMIT 8`) as Array<{ language: string; n: number }>;
+    return rows.map((r) => r.language);
+  } catch {
+    return [];
+  }
+}
+
+export interface Watch {
+  id: number;
+  login: string;
+  email: string;
+  lastScore: number | null;
+}
+
+/** Subscribe an email to score changes for a profile. */
+export async function addWatch(login: string, email: string, currentScore: number | null): Promise<boolean> {
+  const sql = getSql();
+  if (!sql) return false;
+  try {
+    await ensureSchema(sql);
+    await sql`
+      INSERT INTO watches (login, email, last_score)
+      VALUES (${login.toLowerCase()}, ${email.toLowerCase()}, ${currentScore})
+      ON CONFLICT (login, email) DO NOTHING`;
+    return true;
+  } catch (e) {
+    console.warn("addWatch failed:", e instanceof Error ? e.message : e);
+    return false;
+  }
+}
+
+export async function getWatches(limit = 50): Promise<Watch[]> {
+  const sql = getSql();
+  if (!sql) return [];
+  try {
+    await ensureSchema(sql);
+    const rows = (await sql`
+      SELECT id, login, email, last_score FROM watches ORDER BY created_at ASC LIMIT ${limit}`) as Array<{
+      id: number; login: string; email: string; last_score: number | null;
+    }>;
+    return rows.map((r) => ({ id: r.id, login: r.login, email: r.email, lastScore: r.last_score }));
+  } catch {
+    return [];
+  }
+}
+
+export async function updateWatchScore(id: number, score: number): Promise<void> {
+  const sql = getSql();
+  if (!sql) return;
+  try {
+    await sql`UPDATE watches SET last_score = ${score} WHERE id = ${id}`;
+  } catch {
+    /* non-fatal */
   }
 }
