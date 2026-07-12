@@ -17,7 +17,9 @@ export async function POST(req: NextRequest) {
   if (!username || !/^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,38})$/.test(username)) {
     return NextResponse.json({ error: "Enter a valid GitHub username." }, { status: 400 });
   }
-  const token = body.token?.trim() || undefined;
+  // visitor-supplied token wins (their 5,000/hr quota); otherwise the server's
+  // GITHUB_TOKEN keeps production off the shared unauthenticated 60/hr pool
+  const token = body.token?.trim() || process.env.GITHUB_TOKEN?.trim() || undefined;
 
   try {
     const collected = await collect(username, token);
