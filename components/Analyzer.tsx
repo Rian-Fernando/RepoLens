@@ -21,6 +21,8 @@ import Marquee from "@/components/Marquee";
 import AnalyzingLog from "@/components/AnalyzingLog";
 import RoleRadar from "@/components/RoleRadar";
 import Sparkline from "@/components/Sparkline";
+import ScoreHistory from "@/components/ScoreHistory";
+import { buildMarkdownReport } from "@/lib/markdown";
 
 type Phase = "idle" | "analyzing" | "done";
 
@@ -256,6 +258,13 @@ export default function Analyzer({
                 <p className="font-mono-accent text-[11px] mt-1.5" style={{ color: "var(--text-muted)" }}>
                   since {analysis.profile.createdAt.slice(0, 4)} ✦ {formatCompact(analysis.profile.followers)} followers ✦
                   top {analysis.totals.analyzed} repos analyzed
+                  {analysis.fromCache ? (
+                    <span title="Add your own GitHub token above for a fresh crawl">
+                      {" "}✦ cached {analysis.cacheAgeMinutes != null && analysis.cacheAgeMinutes < 90
+                        ? `${analysis.cacheAgeMinutes}m`
+                        : `${Math.round((analysis.cacheAgeMinutes ?? 0) / 60)}h`} ago
+                    </span>
+                  ) : null}
                 </p>
                 <div className="flex flex-wrap gap-2 mt-3 print-hide">
                   <CopyButton text={shareUrl} label="⧉ Copy report link" />
@@ -266,6 +275,7 @@ export default function Analyzer({
                   <button type="button" onClick={() => window.print()} className="btn-ghost px-3 py-1.5 text-xs cursor-pointer">
                     ⎙ Export PDF
                   </button>
+                  <CopyButton text={buildMarkdownReport(analysis, suggestions)} label="Copy as Markdown" />
                 </div>
               </div>
             </div>
@@ -317,6 +327,13 @@ export default function Analyzer({
               note="of analyzed repos"
             />
           </section>
+
+          {analysis.bench && analysis.bench.history.length >= 3 ? (
+            <section className="card card-hover p-5 reveal" style={{ animationDelay: "110ms" }}>
+              <SectionLabel n="↗" title="Score history" />
+              <ScoreHistory bench={analysis.bench} />
+            </section>
+          ) : null}
 
           {/* charts */}
           <section className="grid lg:grid-cols-2 gap-4 items-start reveal" style={{ animationDelay: "140ms" }}>

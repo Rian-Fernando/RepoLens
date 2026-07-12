@@ -14,5 +14,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/compare`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${SITE_URL}/leaderboard`, lastModified: now, changeFrequency: "daily", priority: 0.7 },
     { url: `${SITE_URL}/action`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${SITE_URL}/guide`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
   ];
 }

@@ -66,6 +66,9 @@ export interface Bench {
 export interface Analysis {
   /** Real benchmarking data when the score DB is configured; null otherwise. */
   bench?: Bench | null;
+  /** True when served from the analysis cache instead of a fresh crawl. */
+  fromCache?: boolean;
+  cacheAgeMinutes?: number;
   profile: ProfileSummary;
   totals: {
     publicRepos: number;

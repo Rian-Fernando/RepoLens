@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Manrope, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 import Background from "@/components/Background";
 import Logo from "@/components/Logo";
 import { PORTFOLIO_LABEL, PORTFOLIO_URL, SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
@@ -49,11 +50,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <a href="/action" className="hover:text-white transition-colors" style={{ color: "var(--text-secondary)" }}>
                 CI Action
               </a>
+              <a href="/guide" className="hover:text-white transition-colors" style={{ color: "var(--text-secondary)" }}>
+                Guide
+              </a>
             </nav>
           </div>
         </header>
 
         <main className="flex-1">{children}</main>
+        <Analytics />
 
         <footer className="border-t print-hide" style={{ borderColor: "var(--border)" }}>
           <div

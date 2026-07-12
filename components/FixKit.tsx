@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { RepoAnalysis } from "@/lib/types";
 import CopyButton from "./CopyButton";
 
@@ -8,6 +8,8 @@ import CopyButton from "./CopyButton";
  * The closing-the-loop piece: don't just diagnose a weak repo — generate the
  * fix, ready to commit. AI drafts the README (Gemini free tier, with a
  * template fallback); license + CI workflow are proven static templates.
+ * Signed in with GitHub (and analyzing your own profile)? One click opens
+ * the fix as a real pull request.
  */
 
 const MIT_LICENSE = (owner: string) => `MIT License
@@ -65,14 +67,32 @@ jobs:
 `;
 };
 
+type Tab = "readme" | "license" | "ci";
+const TAB_META: Record<Tab, { file: string; prTitle: string }> = {
+  readme: { file: "README.md", prTitle: "Add a proper README (via RepoLens)" },
+  license: { file: "LICENSE", prTitle: "Add MIT license (via RepoLens)" },
+  ci: { file: ".github/workflows/ci.yml", prTitle: "Add CI workflow (via RepoLens)" },
+};
+
 export default function FixKit({ repo, login }: { repo: RepoAnalysis; login: string }) {
-  const [tab, setTab] = useState<"readme" | "license" | "ci" | null>(null);
+  const [tab, setTab] = useState<Tab | null>(null);
   const [readme, setReadme] = useState<string | null>(null);
   const [engine, setEngine] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [auth, setAuth] = useState<{ configured: boolean; login: string | null } | null>(null);
+  const [prState, setPrState] = useState<{ busy?: boolean; url?: string; error?: string }>({});
+
+  useEffect(() => {
+    if (!tab || auth !== null) return;
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then(setAuth)
+      .catch(() => setAuth({ configured: false, login: null }));
+  }, [tab, auth]);
 
   async function draftReadme() {
     setTab("readme");
+    setPrState({});
     if (readme || loading) return;
     setLoading(true);
     try {
@@ -101,7 +121,30 @@ export default function FixKit({ repo, login }: { repo: RepoAnalysis; login: str
 
   const content =
     tab === "license" ? MIT_LICENSE(login) : tab === "ci" ? CI_WORKFLOW(repo.language) : readme;
-  const filename = tab === "license" ? "LICENSE" : tab === "ci" ? ".github/workflows/ci.yml" : "README.md";
+
+  async function openPr() {
+    if (!tab || !content || prState.busy) return;
+    setPrState({ busy: true });
+    try {
+      const res = await fetch("/api/fix-pr", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          repo: repo.name,
+          path: TAB_META[tab].file,
+          content,
+          title: TAB_META[tab].prTitle,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) setPrState({ url: data.url });
+      else setPrState({ error: data.error ?? "PR creation failed." });
+    } catch {
+      setPrState({ error: "PR creation failed — network error." });
+    }
+  }
+
+  const isOwnProfile = auth?.login && auth.login.toLowerCase() === login.toLowerCase();
 
   return (
     <div className="mt-3">
@@ -113,11 +156,11 @@ export default function FixKit({ repo, login }: { repo: RepoAnalysis; login: str
           ✦ Draft README{repo.readmeScore === null ? "" : " rewrite"}
         </button>
         {!repo.hasLicense ? (
-          <button type="button" onClick={() => setTab("license")} className="btn-ghost px-3 py-1.5 text-xs cursor-pointer">
+          <button type="button" onClick={() => { setTab("license"); setPrState({}); }} className="btn-ghost px-3 py-1.5 text-xs cursor-pointer">
             MIT license
           </button>
         ) : null}
-        <button type="button" onClick={() => setTab("ci")} className="btn-ghost px-3 py-1.5 text-xs cursor-pointer">
+        <button type="button" onClick={() => { setTab("ci"); setPrState({}); }} className="btn-ghost px-3 py-1.5 text-xs cursor-pointer">
           CI workflow
         </button>
         {tab ? (
@@ -130,17 +173,51 @@ export default function FixKit({ repo, login }: { repo: RepoAnalysis; login: str
       {tab ? (
         <div className="mt-3 rounded-xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
           <div
-            className="flex items-center justify-between px-3 py-2 text-xs border-b"
+            className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-xs border-b"
             style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
           >
-            <span className="font-mono">{filename}</span>
+            <span className="font-mono-accent">{TAB_META[tab].file}</span>
             <div className="flex items-center gap-2">
               {tab === "readme" && engine ? (
                 <span>{engine === "gemini" ? "drafted by Gemini" : "template (add GEMINI_API_KEY for AI drafts)"}</span>
               ) : null}
               {content ? <CopyButton text={content} /> : null}
+              {content && auth?.configured ? (
+                isOwnProfile ? (
+                  prState.url ? (
+                    <a href={prState.url} target="_blank" rel="noreferrer" className="btn-accent px-3 py-1.5 text-xs">
+                      ✓ View PR →
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={openPr}
+                      disabled={prState.busy}
+                      className="btn-accent px-3 py-1.5 text-xs cursor-pointer disabled:opacity-60"
+                    >
+                      {prState.busy ? "Opening PR…" : "⤴ Open as PR"}
+                    </button>
+                  )
+                ) : auth.login ? (
+                  <span title={`Signed in as ${auth.login} — PRs only open on your own repos`}>
+                    PRs: own profile only
+                  </span>
+                ) : (
+                  <a
+                    href={`/api/auth/github?returnTo=${encodeURIComponent(`/u/${login}`)}`}
+                    className="btn-ghost px-3 py-1.5 text-xs"
+                  >
+                    Sign in to open as PR
+                  </a>
+                )
+              ) : null}
             </div>
           </div>
+          {prState.error ? (
+            <div className="px-3 py-2 text-xs border-b" style={{ borderColor: "var(--border)", color: "var(--status-critical)" }}>
+              {prState.error}
+            </div>
+          ) : null}
           <pre
             className="p-3 text-xs overflow-x-auto max-h-72 whitespace-pre-wrap"
             style={{ color: "var(--text-secondary)", background: "rgba(13,13,13,0.5)" }}

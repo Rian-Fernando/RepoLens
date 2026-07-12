@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
+    "@vercel/analytics": "^2.0.1",
     "animejs": "^4.5.0",
     "ldrs": "^1.1.9",
     "next": "^15",
