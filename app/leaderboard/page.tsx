@@ -17,7 +17,7 @@ export default async function LeaderboardPage({
   searchParams: Promise<{ lang?: string }>;
 }) {
   const { lang } = await searchParams;
-  const [rows, languages] = await Promise.all([getLeaderboard(50, lang), getLeaderboardLanguages()]);
+  const [rows, languages] = await Promise.all([getLeaderboard(100, lang), getLeaderboardLanguages()]);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
@@ -28,6 +28,12 @@ export default async function LeaderboardPage({
         <h1 className="font-display text-4xl font-semibold tracking-tight text-glow">Leaderboard</h1>
         <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>
           The highest-scoring portfolios analyzed so far. Analyze yours to claim a spot.
+        </p>
+        <p className="font-mono-accent text-[11px] mt-2" style={{ color: "var(--text-muted)" }}>
+          median score is ~50 by design ✦{" "}
+          <a href="/methodology" className="hover:underline" style={{ color: "var(--brand-blue)" }}>
+            how scoring works →
+          </a>
         </p>
       </div>
 
@@ -74,41 +80,65 @@ export default async function LeaderboardPage({
           .
         </div>
       ) : (
-        <ol className="card divide-y overflow-hidden reveal">
-          {rows.map((row, i) => {
-            const tier = getTier(row.score);
+        <div className="space-y-6 reveal">
+          {[
+            { min: 80, label: "EXCELLENT", css: "var(--tier-high)", blurb: "80+ · strong docs, demos, activity and collaboration — roughly one in ten profiles" },
+            { min: 50, label: "DEVELOPING", css: "var(--tier-mid)", blurb: "50–79 · solid foundations, clear next steps — where most active developers land" },
+            { min: 0, label: "NEEDS WORK", css: "var(--tier-low)", blurb: "0–49 · big wins available fast (READMEs, demos, licenses)" },
+          ].map((band, bandIdx, bands) => {
+            const max = bandIdx === 0 ? 101 : bands[bandIdx - 1].min;
+            const bandRows = rows.filter((r) => r.score >= band.min && r.score < max);
+            if (bandRows.length === 0) return null;
+            const offset = rows.findIndex((r) => r.score < max && r.score >= band.min);
             return (
-              <li key={row.login}>
-                <a
-                  href={`/u/${row.login}`}
-                  className="flex items-center gap-4 px-5 py-3 transition-colors hover:bg-white/[0.04]"
-                >
-                  <span className="font-mono-accent text-sm w-8 text-right" style={{ color: i < 3 ? "var(--brand-blue)" : "var(--text-muted)" }}>
-                    {i + 1}
-                  </span>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={`https://github.com/${row.login}.png?size=64`}
-                    alt=""
-                    className="h-8 w-8 rounded-full border"
-                    style={{ borderColor: "var(--border)" }}
-                  />
-                  <span className="font-medium flex-1 truncate">@{row.login}</span>
+              <section key={band.label}>
+                <div className="flex items-baseline justify-between mb-2 px-1">
+                  <h2 className="font-mono-accent text-xs font-bold tracking-[0.14em]" style={{ color: band.css }}>
+                    {band.label}
+                    <span className="ml-2 font-normal" style={{ color: "var(--text-muted)" }}>
+                      {bandRows.length} {bandRows.length === 1 ? "profile" : "profiles"}
+                    </span>
+                  </h2>
                   <span className="font-mono-accent text-[10px] hidden sm:inline" style={{ color: "var(--text-muted)" }}>
-                    {row.analyzedAt}
+                    {band.blurb}
                   </span>
-                  <span
-                    className="font-mono-accent text-[10px] font-bold tracking-wider rounded-full px-2 py-0.5 border"
-                    style={{ color: tier.css, borderColor: tier.css }}
-                  >
-                    {tier.label}
-                  </span>
-                  <span className="font-mono-accent font-bold tnum w-14 text-right">{row.score}</span>
-                </a>
-              </li>
+                </div>
+                <ol className="card divide-y overflow-hidden">
+                  {bandRows.map((row, i) => {
+                    const tier = getTier(row.score);
+                    const rank = offset + i + 1;
+                    return (
+                      <li key={row.login}>
+                        <a
+                          href={`/u/${row.login}`}
+                          className="flex items-center gap-4 px-5 py-3 transition-colors hover:bg-white/[0.04]"
+                        >
+                          <span className="font-mono-accent text-sm w-8 text-right" style={{ color: rank <= 3 ? "var(--brand-blue)" : "var(--text-muted)" }}>
+                            {rank}
+                          </span>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={`https://github.com/${row.login}.png?size=64`}
+                            alt=""
+                            className="h-8 w-8 rounded-full border"
+                            style={{ borderColor: "var(--border)" }}
+                          />
+                          <span className="font-medium flex-1 truncate">@{row.login}</span>
+                          <span className="font-mono-accent text-[10px] hidden sm:inline" style={{ color: "var(--text-muted)" }}>
+                            {row.analyzedAt}
+                          </span>
+                          <span className="font-mono-accent font-bold tnum w-14 text-right" style={{ color: tier.css }}>
+                            {row.score}
+                          </span>
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </section>
             );
           })}
-        </ol>
+        </div>
       )}
     </div>
   );

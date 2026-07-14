@@ -79,7 +79,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 Rian Fernando ✦ {PORTFOLIO_LABEL}
               </a>
             </span>
-            <span className="font-mono-accent text-xs">github api ✦ next.js ✦ three.js ✦ gemini free tier</span>
+            <span className="font-mono-accent text-xs">
+              <a href="/methodology" className="hover:underline" style={{ color: "var(--text-secondary)" }}>how scoring works</a>
+              {" ✦ github api ✦ next.js ✦ gemini free tier"}
+            </span>
           </div>
         </footer>
       </body>

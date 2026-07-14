@@ -306,6 +306,9 @@ export default function Analyzer({
                   : `${percentile >= 50 ? `top ~${100 - percentile}%` : `better than ~${percentile}%`} · estimated`}
               </div>
               <div><GoalChip login={analysis.profile.login} score={analysis.overallScore} /></div>
+              <a href="/methodology" className="font-mono-accent text-[10px] mt-1 inline-block hover:underline print-hide" style={{ color: "var(--text-muted)" }}>
+                how is this scored?
+              </a>
               {analysis.bench && analysis.bench.history.length >= 2 ? (
                 <div className="mt-2 flex flex-col items-center gap-0.5">
                   <Sparkline points={analysis.bench.history.map((h) => h.score)} />
