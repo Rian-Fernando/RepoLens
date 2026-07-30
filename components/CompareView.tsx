@@ -46,7 +46,10 @@ function Corner({ a }: { a: Analysis }) {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={a.profile.avatarUrl}
-        alt={`${a.profile.login} avatar`}
+        alt={`${a.profile.login}'s GitHub avatar`}
+        width={56}
+        height={56}
+        decoding="async"
         className="h-14 w-14 rounded-full border"
         style={{ borderColor: "var(--border-bright)" }}
       />

@@ -3,7 +3,7 @@ import MatchView from "@/components/MatchView";
 import { SITE_NAME } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: `Job match — ${SITE_NAME}`,
+  title: `Job match: is your GitHub ready for this role? — ${SITE_NAME}`,
   description:
     "Paste a job description, get an honest readiness score: which requirements your GitHub actually evidences, and how to close the gaps.",
   alternates: { canonical: "/match" },

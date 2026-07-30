@@ -178,7 +178,7 @@ export default function OrgView() {
                     {r.score !== null ? i + 1 : "–"}
                   </span>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={`https://github.com/${r.login}.png?size=48`} alt="" className="h-7 w-7 rounded-full border" style={{ borderColor: "var(--border)" }} />
+                  <img src={`https://github.com/${r.login}.png?size=48`} alt="" width={28} height={28} loading="lazy" decoding="async" className="h-7 w-7 rounded-full border" style={{ borderColor: "var(--border)" }} />
                   <a href={`/u/${r.login}`} className="font-medium flex-1 truncate hover:underline">
                     @{r.login}
                   </a>

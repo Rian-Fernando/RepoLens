@@ -291,6 +291,13 @@ select.input-dark {
   border-color: var(--grid-hairline);
 }
 
+/* keyboard focus: always visible, brand-colored, never clipped */
+:focus-visible {
+  outline: 2px solid var(--brand-blue);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
 /* tabular figures only where numbers must align vertically */
 .tnum {
   font-variant-numeric: tabular-nums;

@@ -4,8 +4,9 @@ import { getTier } from "@/lib/tiers";
 import { SITE_NAME } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: `Leaderboard — ${SITE_NAME}`,
-  description: "Top-scoring GitHub portfolios analyzed by RepoLens.",
+  title: `Top-scoring GitHub portfolios — ${SITE_NAME}`,
+  description:
+    "Every GitHub profile analyzed by RepoLens, ranked by portfolio score and grouped into tiers. Filter by primary language to see the top Python, JavaScript, TypeScript or Rust portfolios.",
   alternates: { canonical: "/leaderboard" },
 };
 
@@ -120,6 +121,10 @@ export default async function LeaderboardPage({
                           <img
                             src={`https://github.com/${row.login}.png?size=64`}
                             alt=""
+                            width={32}
+                            height={32}
+                            loading="lazy"
+                            decoding="async"
                             className="h-8 w-8 rounded-full border"
                             style={{ borderColor: "var(--border)" }}
                           />

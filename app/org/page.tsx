@@ -3,7 +3,7 @@ import OrgView from "@/components/OrgView";
 import { SITE_NAME } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: `Cohorts — ${SITE_NAME}`,
+  title: `Rank a GitHub organization or cohort — ${SITE_NAME}`,
   description:
     "Rank a GitHub organization or any list of usernames by portfolio score — for hackathons, bootcamps, and classrooms. CSV export included.",
   alternates: { canonical: "/org" },

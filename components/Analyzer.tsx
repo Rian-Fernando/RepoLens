@@ -236,7 +236,10 @@ export default function Analyzer({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={analysis.profile.avatarUrl}
-                alt={`${analysis.profile.login} avatar`}
+                alt={`${analysis.profile.login}'s GitHub avatar`}
+                width={64}
+                height={64}
+                decoding="async"
                 className="h-16 w-16 rounded-full border"
                 style={{ borderColor: "var(--border-bright)" }}
               />
