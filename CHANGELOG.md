@@ -3,6 +3,14 @@
 All notable changes to RepoLens. Dates are release dates; the live app updates on every
 push to `main`.
 
+## 2026-08-02 — Feedback widget
+
+- [Feedex](https://feedex.rianfernando.com) widget on every page, loaded with
+  `next/script` at `lazyOnload` so it stays off the critical path
+- Each report is tagged with the route it came from, so feedback about the job
+  matcher is distinguishable from feedback about a shared report
+- Env-gated on `NEXT_PUBLIC_FEEDEX_KEY`: unset, nothing renders
+
 ## 2026-07-30 — GEO readiness and a real home page
 
 - `/llms.txt` following the llms.txt convention, so answer engines can read a factual,

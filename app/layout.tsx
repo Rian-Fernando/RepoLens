@@ -1,14 +1,18 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Manrope, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Background from "@/components/Background";
 import Logo from "@/components/Logo";
+import FeedexRoute from "@/components/FeedexRoute";
 import { PORTFOLIO_LABEL, PORTFOLIO_URL, SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
 
 const display = Manrope({ subsets: ["latin"], variable: "--font-display", weight: ["400", "500", "700", "800"] });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", weight: ["400", "500", "700"] });
+
+const FEEDEX_KEY = process.env.NEXT_PUBLIC_FEEDEX_KEY;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -85,6 +89,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </span>
           </div>
         </footer>
+
+        {/* Feedback widget — renders only when a Feedex project key is configured */}
+        {FEEDEX_KEY ? (
+          <>
+            <Script
+              src="https://feedex.rianfernando.com/widget.js"
+              data-feedex-key={FEEDEX_KEY}
+              strategy="lazyOnload"
+            />
+            <FeedexRoute />
+          </>
+        ) : null}
       </body>
     </html>
   );
