@@ -3,6 +3,18 @@
 All notable changes to RepoLens. Dates are release dates; the live app updates on every
 push to `main`.
 
+## 2026-09-11 — GitHub API access paused
+
+- Global kill switch in `lib/github.ts`, defaulting to **off**: no request
+  reaches api.github.com unless `GITHUB_API_ENABLED=true` is set explicitly
+- Profile analysis runs cache-only — previously analyzed reports still open,
+  new ones return a clear "paused" message instead of crawling
+- A visitor-supplied token no longer forces a live crawl either
+- Score API, badges, OG cards, Fix PRs and GitHub sign-in all refuse cleanly
+- The weekly watch cron is removed from `vercel.json`
+- Organization member lookup (the one call the browser made directly to
+  GitHub) is retired; pasted username lists still work
+
 ## 2026-08-02 — Feedback widget
 
 - [Feedex](https://feedex.rianfernando.com) widget on every page, loaded with

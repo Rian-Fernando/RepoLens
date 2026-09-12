@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { collect, GitHubError } from "@/lib/github";
+import { collect, GitHubError, GITHUB_API_ENABLED, GITHUB_PAUSED_MESSAGE } from "@/lib/github";
 import { analyze } from "@/lib/analyze";
 import { getBench, getCachedAnalysis, recordScore, setCachedAnalysis } from "@/lib/db";
 import type { Analysis } from "@/lib/types";
@@ -10,6 +10,8 @@ export const maxDuration = 60;
 const CACHE_FRESH_MINUTES = 360; // 6h
 /** On rate-limit, any cache younger than this beats an error page. */
 const CACHE_STALE_MINUTES = 60 * 24 * 14; // 14 days
+/** While GitHub access is paused, age stops mattering — cache is all there is. */
+const CACHE_PAUSED_MINUTES = 60 * 24 * 365 * 10;
 
 export async function POST(req: NextRequest) {
   let body: { username?: string; token?: string };
@@ -30,8 +32,13 @@ export async function POST(req: NextRequest) {
 
   // Cache-first for tokenless visitors: repeat lookups cost zero GitHub calls.
   // A visitor who brings their own token always gets a fresh crawl.
-  if (!visitorToken) {
-    const cached = await getCachedAnalysis(username, CACHE_FRESH_MINUTES);
+  // While paused, a visitor-supplied token must NOT trigger a live crawl either:
+  // no request reaches GitHub from this deployment, from anyone, for any reason.
+  if (!visitorToken || !GITHUB_API_ENABLED) {
+    const cached = await getCachedAnalysis(
+      username,
+      GITHUB_API_ENABLED ? CACHE_FRESH_MINUTES : CACHE_PAUSED_MINUTES,
+    );
     if (cached) {
       const result = cached.data as Analysis;
       result.fromCache = true;
@@ -39,6 +46,13 @@ export async function POST(req: NextRequest) {
       result.bench = await getBench(result.profile.login, result.overallScore);
       return NextResponse.json(result);
     }
+  }
+
+  if (!GITHUB_API_ENABLED) {
+    return NextResponse.json(
+      { error: `${GITHUB_PAUSED_MESSAGE} No cached report exists for "${username}".` },
+      { status: 503 },
+    );
   }
 
   try {

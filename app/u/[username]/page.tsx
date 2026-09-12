@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Analyzer from "@/components/Analyzer";
+import PausedNotice from "@/components/PausedNotice";
 import { SITE_NAME } from "@/lib/site";
 
 /** Shareable report: /u/<username> auto-runs the analysis for that user. */
@@ -37,6 +38,7 @@ export default async function UserReport({
           quality, README quality, commit habits, collaboration — and scores the profile out of 100.
         </p>
       </header>
+      <PausedNotice />
       <Analyzer initialUsername={username} autorun hero={false} />
     </div>
   );

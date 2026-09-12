@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sessionLogin, sessionToken } from "@/lib/oauth";
+import { GITHUB_API_ENABLED, GITHUB_PAUSED_MESSAGE } from "@/lib/github";
 
 export const maxDuration = 60;
 
@@ -38,6 +39,9 @@ async function gh(token: string, path: string, init?: RequestInit) {
 }
 
 export async function POST(req: NextRequest) {
+  if (!GITHUB_API_ENABLED) {
+    return NextResponse.json({ error: GITHUB_PAUSED_MESSAGE }, { status: 503 });
+  }
   const token = await sessionToken();
   const login = token ? await sessionLogin() : null;
   if (!token || !login) {

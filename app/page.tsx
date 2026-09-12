@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Analyzer from "@/components/Analyzer";
 import HomeContent from "@/components/HomeContent";
+import PausedNotice from "@/components/PausedNotice";
 import { FAQS } from "@/lib/faq";
 import { PORTFOLIO_URL, SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -57,6 +58,7 @@ export default function Home() {
     <div id="top" className="mx-auto max-w-6xl px-4 py-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(APP_LD) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_LD) }} />
+      <PausedNotice />
       <Analyzer />
       <HomeContent />
     </div>

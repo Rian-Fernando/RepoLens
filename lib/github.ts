@@ -9,6 +9,21 @@
 const API = "https://api.github.com";
 export const DEEP_DIVE_LIMIT = 12;
 
+/**
+ * GLOBAL KILL SWITCH — GitHub API access is OFF unless explicitly enabled.
+ *
+ * Every outbound call to GitHub in this app funnels through this module, so
+ * flipping this off stops all of it: profile analysis, badges, the score API,
+ * OG cards and the weekly cron. It defaults to disabled deliberately, so a
+ * deploy alone halts traffic without needing an environment change.
+ *
+ * To turn GitHub access back on, set GITHUB_API_ENABLED=true.
+ */
+export const GITHUB_API_ENABLED = process.env.GITHUB_API_ENABLED === "true";
+
+export const GITHUB_PAUSED_MESSAGE =
+  "Live GitHub analysis is paused on this deployment. Reports already in the cache still open normally.";
+
 export class GitHubError extends Error {
   constructor(
     message: string,
@@ -82,6 +97,7 @@ function headers(token?: string, raw = false): HeadersInit {
 }
 
 async function gh<T>(path: string, token?: string, raw = false): Promise<T> {
+  if (!GITHUB_API_ENABLED) throw new GitHubError(GITHUB_PAUSED_MESSAGE, 503);
   const res = await fetch(`${API}${path}`, {
     headers: headers(token, raw),
     // GitHub data for a profile changes slowly; avoid hammering the rate limit
@@ -105,6 +121,7 @@ async function gh<T>(path: string, token?: string, raw = false): Promise<T> {
 
 /** Fetch everything the analyzer needs. Per-repo failures degrade to partial data. */
 export async function collect(username: string, token?: string): Promise<Collected> {
+  if (!GITHUB_API_ENABLED) throw new GitHubError(GITHUB_PAUSED_MESSAGE, 503);
   const user = await gh<GhUser>(`/users/${encodeURIComponent(username)}`, token).catch((e) => {
     if (e instanceof GitHubError && e.status === 404)
       throw new GitHubError(`GitHub user "${username}" was not found.`, 404);

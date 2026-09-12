@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import MatchView from "@/components/MatchView";
+import PausedNotice from "@/components/PausedNotice";
 import { SITE_NAME } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -22,6 +23,7 @@ export default function MatchPage() {
           you can prove, what&apos;s thin, and the fastest way to close each gap.
         </p>
       </div>
+      <PausedNotice />
       <MatchView />
     </div>
   );

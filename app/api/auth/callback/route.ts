@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { STATE_COOKIE, TOKEN_COOKIE } from "@/lib/oauth";
+import { oauthConfigured, STATE_COOKIE, TOKEN_COOKIE } from "@/lib/oauth";
 
 export async function GET(req: NextRequest) {
+  // oauthConfigured() is false while GitHub access is paused, so a direct hit
+  // on this callback can never exchange a code against github.com.
+  if (!oauthConfigured()) {
+    return NextResponse.redirect(new URL("/?auth=disabled", req.nextUrl.origin));
+  }
   const code = req.nextUrl.searchParams.get("code");
   const state = req.nextUrl.searchParams.get("state");
   const expected = req.cookies.get(STATE_COOKIE)?.value;

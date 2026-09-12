@@ -3,6 +3,7 @@ import { collect } from "@/lib/github";
 import { analyze } from "@/lib/analyze";
 import { getWatches, recordScore, setCachedAnalysis, updateWatchScore } from "@/lib/db";
 import { getTier } from "@/lib/tiers";
+import { GITHUB_API_ENABLED } from "@/lib/github";
 import { SITE_URL } from "@/lib/site";
 
 export const maxDuration = 300;
@@ -34,6 +35,9 @@ export async function GET(req: NextRequest) {
   const auth = req.headers.get("authorization");
   if (!process.env.CRON_SECRET || auth !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+  if (!GITHUB_API_ENABLED) {
+    return NextResponse.json({ skipped: "GitHub access is paused (GITHUB_API_ENABLED is not true)" });
   }
   if (!process.env.RESEND_API_KEY) {
     return NextResponse.json({ skipped: "RESEND_API_KEY not set" });

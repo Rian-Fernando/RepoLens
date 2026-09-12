@@ -34,18 +34,11 @@ export default function OrgView() {
     if (pasted.length > 0) return [...new Set(pasted)].slice(0, CAP);
 
     if (!org.trim()) return [];
-    const res = await fetch(`https://api.github.com/orgs/${encodeURIComponent(org.trim())}/members?per_page=${CAP}`, {
-      headers: { Accept: "application/vnd.github+json" },
-    });
-    if (!res.ok) {
-      throw new Error(
-        res.status === 404
-          ? `Organization "${org.trim()}" not found (note: only public members are listed).`
-          : "Couldn't list the organization's members — try pasting usernames instead.",
-      );
-    }
-    const members = (await res.json()) as Array<{ login: string }>;
-    return members.map((m) => m.login).slice(0, CAP);
+    // Organization member lookup called GitHub directly from the browser.
+    // That path is retired while GitHub access is paused — paste usernames instead.
+    throw new Error(
+      "Looking up an organization's members is unavailable right now. Paste the usernames instead — that still works.",
+    );
   }
 
   async function run(e: React.FormEvent) {

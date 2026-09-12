@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import OrgView from "@/components/OrgView";
+import PausedNotice from "@/components/PausedNotice";
 import { SITE_NAME } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -22,6 +23,7 @@ export default function OrgPage() {
           group scored, ranked, and exportable as CSV.
         </p>
       </div>
+      <PausedNotice />
       <OrgView />
     </div>
   );

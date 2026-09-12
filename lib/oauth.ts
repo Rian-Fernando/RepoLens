@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { GITHUB_API_ENABLED } from "./github";
 
 /**
  * Minimal GitHub OAuth session for the Fix-PR feature.
@@ -14,7 +15,11 @@ export const TOKEN_COOKIE = "rl_gh_token";
 export const STATE_COOKIE = "rl_oauth_state";
 
 export function oauthConfigured(): boolean {
-  return Boolean(process.env.GITHUB_OAUTH_CLIENT_ID && process.env.GITHUB_OAUTH_CLIENT_SECRET);
+  // gated on the same kill switch: no GitHub access means no sign-in either
+  return (
+    GITHUB_API_ENABLED &&
+    Boolean(process.env.GITHUB_OAUTH_CLIENT_ID && process.env.GITHUB_OAUTH_CLIENT_SECRET)
+  );
 }
 
 export async function sessionToken(): Promise<string | null> {
@@ -24,6 +29,7 @@ export async function sessionToken(): Promise<string | null> {
 
 /** Validate the cookie token against GitHub; returns the login or null. */
 export async function sessionLogin(): Promise<string | null> {
+  if (!GITHUB_API_ENABLED) return null;
   const token = await sessionToken();
   if (!token) return null;
   const res = await fetch("https://api.github.com/user", {
