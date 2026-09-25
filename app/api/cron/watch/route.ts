@@ -9,9 +9,14 @@ import { SITE_URL } from "@/lib/site";
 export const maxDuration = 300;
 
 /**
- * Weekly watch job (vercel.json cron). Re-scores every watched profile and
- * emails subscribers whose score moved. Protected by Vercel's cron auth
- * (Authorization: Bearer CRON_SECRET).
+ * Weekly watch job. Re-scores every watched profile and emails subscribers
+ * whose score moved. Protected by Vercel's cron auth (Authorization: Bearer
+ * CRON_SECRET).
+ *
+ * The schedule is currently removed from vercel.json while GitHub access is
+ * paused. To restore it, add {"path": "/api/cron/watch", "schedule": "0 13 * * 1"}
+ * under "crons" there, together with GITHUB_API_ENABLED=true. Before enabling,
+ * subscriptions need a double opt-in confirmation email.
  */
 
 async function sendEmail(to: string, subject: string, html: string): Promise<boolean> {

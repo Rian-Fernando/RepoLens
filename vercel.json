@@ -1,4 +1,4 @@
 {
-  "$comment": "The weekly watch cron is disabled while GitHub access is paused. Restore the crons block below once GITHUB_API_ENABLED=true.",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "crons": []
 }
