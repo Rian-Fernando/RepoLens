@@ -23,3 +23,8 @@ npm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# vercel (local project link + any pulled env files)
+.vercel
+.env*
+!.env.local.example

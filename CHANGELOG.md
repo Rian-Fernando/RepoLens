@@ -3,6 +3,35 @@
 All notable changes to RepoLens. Dates are release dates; the live app updates on every
 push to `main`.
 
+## 2026-09-25 — Compliance pass
+
+GitHub API — brought in line with GitHub's REST API best practices and rate-limit rules:
+- Requests are made one at a time instead of ~36 concurrently per analysis
+- A rate-limited response opens a breaker shared by every server instance until GitHub's
+  `retry-after` / `x-ratelimit-reset`; nothing is retried automatically, and the last 20% of
+  the hourly quota is never spent
+- Only a person clicking Analyze can start a crawl: badges, OG cards and the score API now
+  read cached results instead of crawling when bots, image proxies or CI fetch them
+- Per-visitor cap of 3 fresh analyses an hour and a site-wide cap of 20 an hour on the shared
+  quota; over either, the cached report is served
+- The server token is always tracked under the shared breaker; a visitor's own token is not
+
+Gemini — brought in line with the Gemini API Additional Terms and Prohibited Use Policy:
+- Visitors in the EEA, UK and Switzerland are served by the rules engine, never the free tier
+- Prompts no longer include names, bios or usernames
+- 30 AI requests per visitor per hour, then the rules engine answers
+- Roast mode asks the visitor to confirm the profile is their own
+
+Security and privacy:
+- Fixed an open redirect in the GitHub sign-in callback (`//host` return paths)
+- Security headers: nosniff, referrer policy, permissions policy, frame-ancestors (embed
+  widget excepted)
+- CI workflow runs with read-only permissions (clears the code-scanning alert)
+- New `/privacy` page with a removal route; `scripts/forget.mjs` deletes a username
+  everywhere on request
+- Per-person report pages are `noindex`
+- `NOTICE.md` corrected: the analysis cache is not "short-lived"
+
 ## 2026-09-11 — GitHub API access paused
 
 - Global kill switch in `lib/github.ts`, defaulting to **off**: no request

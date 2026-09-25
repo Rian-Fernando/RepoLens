@@ -12,8 +12,11 @@ const BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 // First model that works wins; env override goes first.
 const MODEL_CANDIDATES = [
   process.env.GEMINI_MODEL,
+  // "-latest" aliases track Google's current model, so they aren't retired out
+  // from under the app the way pinned names are (gemini-2.5-flash now 404s for
+  // new users). Flash-Lite is the fallback when Flash is overloaded (503).
   "gemini-flash-latest",
-  "gemini-2.5-flash",
+  "gemini-flash-lite-latest",
 ].filter((m): m is string => Boolean(m));
 
 export class GeminiError extends Error {

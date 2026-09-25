@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
     try {
       let score = scored.get(watch.login);
       if (score === undefined) {
-        const collected = await collect(watch.login, process.env.GITHUB_TOKEN?.trim() || undefined);
+        const collected = await collect(watch.login);
         const analysis = analyze(collected);
         score = analysis.overallScore;
         scored.set(watch.login, score);

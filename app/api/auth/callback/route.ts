@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { oauthConfigured, STATE_COOKIE, TOKEN_COOKIE } from "@/lib/oauth";
+import { oauthConfigured, safeReturnPath, STATE_COOKIE, TOKEN_COOKIE } from "@/lib/oauth";
 
 export async function GET(req: NextRequest) {
   // oauthConfigured() is false while GitHub access is paused, so a direct hit
@@ -27,8 +27,13 @@ export async function GET(req: NextRequest) {
   const tokenData = await tokenRes.json();
   const accessToken: string | undefined = tokenData.access_token;
 
-  const returnTo = decodeURIComponent(state.split(":")[1] ?? "/");
-  const safeReturn = returnTo.startsWith("/") ? returnTo : "/";
+  let returnTo = "/";
+  try {
+    returnTo = decodeURIComponent(state.split(":")[1] ?? "/");
+  } catch {
+    /* malformed encoding → home */
+  }
+  const safeReturn = safeReturnPath(returnTo);
   const res = NextResponse.redirect(new URL(accessToken ? safeReturn : "/?auth=failed", req.nextUrl.origin));
   res.cookies.delete(STATE_COOKIE);
   if (accessToken) {

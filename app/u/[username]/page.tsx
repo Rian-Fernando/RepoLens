@@ -17,6 +17,8 @@ export async function generateMetadata({
     description,
     twitter: { card: "summary_large_image" },
     alternates: { canonical: `/u/${username}` },
+    // Per-person evaluations stay shareable by link but out of search indexes.
+    robots: { index: false, follow: true },
     openGraph: { title: `${username}'s GitHub portfolio score`, description },
   };
 }

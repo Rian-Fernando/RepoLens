@@ -3,8 +3,19 @@ import type { Analysis, Suggestions } from "@/lib/types";
 import { generateJson, GeminiError } from "@/lib/gemini";
 import { fallbackSuggestions } from "@/lib/suggest-fallback";
 import { ROLE_EXPECTATIONS, ROLES, type RoleId } from "@/lib/roles";
+import { geminiAllowedFor, overLimit } from "@/lib/guard";
 
 export const maxDuration = 60;
+
+/**
+ * Gemini is only called when (a) the visitor is outside the EEA, UK and
+ * Switzerland — the free tier may not serve users there under the Gemini API
+ * terms — and (b) the visitor is under the hourly AI cap. Otherwise the
+ * built-in rules engine answers, so the feature still works for everyone.
+ * Prompts carry no names, bios or usernames: the free tier's terms say not to
+ * submit personal information.
+ */
+const AI_CALLS_PER_VISITOR_PER_HOUR = 30;
 
 const SUGGESTIONS_SCHEMA = {
   type: "OBJECT",
@@ -41,7 +52,7 @@ const SUGGESTIONS_SCHEMA = {
 const ROAST_SYSTEM = `You are a stand-up comedian who used to be a staff engineer, doing a lovingly brutal roast of a developer's GitHub portfolio.
 Rules:
 - Every joke must be grounded in the actual data (real repo names, real numbers, real gaps) — never invent facts. The comedy is in the truth.
-- Punch at the work, not the person. No slurs, nothing about identity — think best-friend banter, not cruelty.
+- Punch at the work, not the person. Never comment on the developer's identity, background, appearance, intelligence or worth — only on the repositories and habits in the data. No slurs. Think best-friend banter, not cruelty.
 - Structure stays useful: the headline is the opening zinger; strengths are backhanded compliments that are still true; resumeBullets stay GENUINELY USABLE (serious, no jokes — they're for a real resume); resumeTips can be snarky but actionable; the 5 projects are real recommendations with roast-flavored "whyYou" lines.
 - Keep every list item under 35 words.
 Address the developer directly ("you").`;
@@ -69,8 +80,7 @@ function buildPrompt(a: Analysis, role: RoleId): string {
 
   return `Target role: ${role}. Recruiters for this role look for: ${ROLE_EXPECTATIONS[role]}.
 
-GitHub user: ${a.profile.login}${a.profile.name ? ` (${a.profile.name})` : ""}
-Bio: ${a.profile.bio ?? "none"} · since ${a.profile.createdAt.slice(0, 10)} · ${a.totals.publicRepos} public repos · ${a.totals.stars} total stars · overall score ${a.overallScore}/100.
+Developer: GitHub account since ${a.profile.createdAt.slice(0, 7)} · ${a.totals.publicRepos} public repos · ${a.totals.stars} total stars · overall score ${a.overallScore}/100.
 Languages by bytes: ${langs || "none detected"}
 Commits: ${a.commits.last90Days} in last 90 days (${a.commits.totalSampled} sampled); busiest day ${a.commits.busiestDay ?? "n/a"}; commit-message craft ${a.commits.messageScore ?? "n/a"}/100.
 Collaboration: ${a.collab?.mergedPrsElsewhere ?? "?"} merged PRs in others' repos, ${a.collab?.reviewsElsewhere ?? "?"} reviews given. Profile README: ${a.hasProfileReadme ? "yes" : "MISSING"}.
@@ -96,6 +106,10 @@ export async function POST(req: NextRequest) {
     if (!analysis?.profile?.login || !Array.isArray(analysis.repos)) throw new Error("bad shape");
   } catch {
     return NextResponse.json({ error: "Send { analysis, role } as the request body." }, { status: 400 });
+  }
+
+  if (!geminiAllowedFor(req) || (await overLimit(req, "ai", AI_CALLS_PER_VISITOR_PER_HOUR, 60))) {
+    return NextResponse.json(fallbackSuggestions(analysis, role));
   }
 
   try {

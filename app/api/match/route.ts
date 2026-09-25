@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { Analysis } from "@/lib/types";
 import { generateJson, GeminiError } from "@/lib/gemini";
+import { geminiAllowedFor, overLimit } from "@/lib/guard";
 
 export const maxDuration = 60;
+
+/**
+ * Gemini is only called when (a) the visitor is outside the EEA, UK and
+ * Switzerland — the free tier may not serve users there under the Gemini API
+ * terms — and (b) the visitor is under the hourly AI cap. Otherwise the
+ * built-in rules engine answers, so the feature still works for everyone.
+ * Prompts carry no names, bios or usernames: the free tier's terms say not to
+ * submit personal information.
+ */
+const AI_CALLS_PER_VISITOR_PER_HOUR = 30;
 
 /**
  * Job-post matcher: map a pasted job description against the evidence in an
@@ -117,13 +128,17 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const portfolio = `Candidate: ${analysis.profile.login} — overall ${analysis.overallScore}/100.
+  const portfolio = `Candidate — overall portfolio score ${analysis.overallScore}/100.
 Languages: ${analysis.languages.map((l) => `${l.name} ${l.percent}%`).join(", ") || "n/a"}
 Collaboration: ${analysis.collab?.mergedPrsElsewhere ?? "?"} merged PRs elsewhere, ${analysis.collab?.reviewsElsewhere ?? "?"} reviews.
 Activity: ${analysis.commits.last90Days} commits/90d; message craft ${analysis.commits.messageScore ?? "n/a"}/100.
 Repos:
 ${analysis.repos.map((r) => `- ${r.name} (${r.language ?? "n/a"}): "${r.description ?? "no description"}" topics=[${r.topics.join(",")}] demo=${r.homepage ? "yes" : "no"} readme=${r.readmeScore ?? "none"}/100`).join("\n")}
 Coverage: ${analysis.gaps.map((g) => `${g.title}=${g.severity === "good" ? "ok" : "gap"}`).join(", ")}`;
+
+  if (!geminiAllowedFor(req) || (await overLimit(req, "ai", AI_CALLS_PER_VISITOR_PER_HOUR, 60))) {
+    return NextResponse.json(fallbackMatch(analysis, jd));
+  }
 
   try {
     const result = await generateJson<Omit<MatchResult, "engine">>({

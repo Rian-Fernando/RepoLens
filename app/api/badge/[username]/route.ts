@@ -1,17 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { collect } from "@/lib/github";
-import { analyze } from "@/lib/analyze";
+import { getLatestScore } from "@/lib/db";
 import { getTier } from "@/lib/tiers";
 
 /**
  * Embeddable SVG score badge, shields.io style:
  *   ![RepoLens](https://repolens.rianfernando.com/api/badge/<username>)
- * Cached for a day at the edge so embedding it in READMEs doesn't burn
- * the GitHub API budget.
+ * Reads the latest recorded score and never contacts GitHub: badges are
+ * fetched automatically by GitHub's image proxy on every README view.
  */
-
-export const maxDuration = 60;
-
 
 
 function badgeSvg(label: string, value: string, color: string): string {
@@ -48,12 +44,9 @@ export async function GET(
   }
 
   try {
-    const collected = await collect(username, process.env.GITHUB_TOKEN?.trim() || undefined);
-    const a = analyze(collected);
-    return new NextResponse(
-      badgeSvg("RepoLens", `${a.overallScore}/100`, getTier(a.overallScore).hex),
-      { headers },
-    );
+    const score = await getLatestScore(username);
+    if (score === null) throw new Error("not analyzed yet");
+    return new NextResponse(badgeSvg("RepoLens", `${score}/100`, getTier(score).hex), { headers });
   } catch {
     return new NextResponse(badgeSvg("RepoLens", "unrated", "#8b949e"), { headers });
   }

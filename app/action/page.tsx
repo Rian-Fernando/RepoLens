@@ -68,9 +68,9 @@ export default function ActionPage() {
           Your portfolio, under CI
         </h1>
         <p className="mt-3 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-          Code gets tests; portfolios rot silently. This workflow re-scores your GitHub profile every week
-          and fails loudly when quality drops — a stale demo link, a deleted README, six months without a
-          commit. It runs on the public score API, so there is nothing to install and nothing to pay.
+          Code gets tests; portfolios rot silently. This workflow checks your RepoLens score every week and
+          fails loudly when it drops below your bar — so a threshold you set once keeps holding you to it. It
+          reads the public score API, so there is nothing to install and nothing to pay.
         </p>
       </div>
 
@@ -129,9 +129,10 @@ export default function ActionPage() {
         <h2 className="font-display font-semibold mb-2">The API behind it</h2>
         <p style={{ color: "var(--text-secondary)" }}>
           <code className="font-mono-accent">GET /api/score/&lt;username&gt;</code> returns{" "}
-          <code className="font-mono-accent">{`{ score, percentileEstimate, parts, openGaps }`}</code>, cached at
-          the edge for six hours. Percentiles are currently estimated from a calibrated curve — real percentiles
-          against the population of analyzed profiles land when the score database ships.
+          <code className="font-mono-accent">{`{ score, percentileEstimate, parts, openGaps, analyzedAt }`}</code>{" "}
+          from your latest RepoLens analysis, cached at the edge for six hours. It deliberately never contacts
+          GitHub itself — scheduled checks from many repos must not turn into automated crawling — so re-analyze
+          your profile on RepoLens after you improve it, and the next check picks up the new score.
         </p>
       </div>
     </div>

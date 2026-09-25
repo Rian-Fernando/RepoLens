@@ -35,6 +35,10 @@ export default async function LeaderboardPage({
           <a href="/methodology" className="hover:underline" style={{ color: "var(--brand-blue)" }}>
             how scoring works →
           </a>
+          {" ✦ "}
+          <a href="/privacy#removing-a-profile" className="hover:underline" style={{ color: "var(--brand-blue)" }}>
+            remove a profile
+          </a>
         </p>
       </div>
 

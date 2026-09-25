@@ -395,10 +395,19 @@ export default function Analyzer({
                     key={mode}
                     type="button"
                     onClick={() => {
-                      if (style !== mode) {
-                        setStyle(mode);
-                        void fetchSuggestions(analysis, role, mode);
+                      if (style === mode) return;
+                      // Roasting someone else is "insulting of others" under Google's
+                      // generative-AI prohibited-use policy — own profiles only.
+                      if (
+                        mode === "roast" &&
+                        !window.confirm(
+                          `Roast mode is only for your own profile.\n\nIs @${analysis.profile.login} your GitHub account?`,
+                        )
+                      ) {
+                        return;
                       }
+                      setStyle(mode);
+                      void fetchSuggestions(analysis, role, mode);
                     }}
                     className="font-mono-accent text-[11px] rounded-full border px-3 py-1 cursor-pointer transition-colors"
                     style={{

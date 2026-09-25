@@ -38,6 +38,22 @@ async function ensureSchema(sql: Sql): Promise<void> {
         data JSONB NOT NULL,
         created_at TIMESTAMPTZ NOT NULL DEFAULT now()
       )`;
+    // shared guard state: a cross-instance circuit breaker for the GitHub API
+    await sql`
+      CREATE TABLE IF NOT EXISTS guards (
+        key TEXT PRIMARY KEY,
+        until TIMESTAMPTZ NOT NULL,
+        reason TEXT
+      )`;
+    // per-visitor rate limiting — stores a salted, daily-rotated hash, never a raw IP
+    await sql`
+      CREATE TABLE IF NOT EXISTS rate_events (
+        id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+        bucket TEXT NOT NULL,
+        key_hash TEXT NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      )`;
+    await sql`CREATE INDEX IF NOT EXISTS rate_events_lookup ON rate_events (bucket, key_hash, created_at)`;
     await sql`
       CREATE TABLE IF NOT EXISTS watches (
         id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -260,5 +276,72 @@ export async function updateWatchScore(id: number, score: number): Promise<void>
     await sql`UPDATE watches SET last_score = ${score} WHERE id = ${id}`;
   } catch {
     /* non-fatal */
+  }
+}
+
+// ---------- guards: breaker, budgets, rate limits ----------
+
+/** When a guard is open, the timestamp it stays open until; null when closed. */
+export async function getGuardUntil(key: string): Promise<Date | null> {
+  const sql = getSql();
+  if (!sql) return null;
+  try {
+    await ensureSchema(sql);
+    const rows = (await sql`
+      SELECT until FROM guards WHERE key = ${key} AND until > now()`) as Array<{ until: string }>;
+    return rows[0] ? new Date(rows[0].until) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Open (or extend) a guard until the given time. Never shortens an open guard. */
+export async function setGuardUntil(key: string, until: Date, reason: string): Promise<void> {
+  const sql = getSql();
+  if (!sql) return;
+  try {
+    await ensureSchema(sql);
+    await sql`
+      INSERT INTO guards (key, until, reason) VALUES (${key}, ${until.toISOString()}, ${reason})
+      ON CONFLICT (key) DO UPDATE
+        SET until = GREATEST(guards.until, EXCLUDED.until), reason = EXCLUDED.reason`;
+  } catch (e) {
+    console.warn("setGuardUntil failed (non-fatal):", e instanceof Error ? e.message : e);
+  }
+}
+
+/** Fresh GitHub crawls in the last N minutes (every crawl rewrites its analyses row). */
+export async function countFreshAnalyses(minutes: number): Promise<number | null> {
+  const sql = getSql();
+  if (!sql) return null;
+  try {
+    await ensureSchema(sql);
+    const [row] = (await sql`
+      SELECT count(*)::int AS n FROM analyses
+      WHERE created_at > now() - make_interval(mins => ${minutes})`) as Array<{ n: number }>;
+    return row.n;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Record one event for a visitor and report how many they have in the window,
+ * including this one. Returns null when no database is configured.
+ */
+export async function hitRateBucket(bucket: string, keyHash: string, windowMinutes: number): Promise<number | null> {
+  const sql = getSql();
+  if (!sql) return null;
+  try {
+    await ensureSchema(sql);
+    await sql`DELETE FROM rate_events WHERE created_at < now() - interval '1 day'`;
+    await sql`INSERT INTO rate_events (bucket, key_hash) VALUES (${bucket}, ${keyHash})`;
+    const [row] = (await sql`
+      SELECT count(*)::int AS n FROM rate_events
+      WHERE bucket = ${bucket} AND key_hash = ${keyHash}
+        AND created_at > now() - make_interval(mins => ${windowMinutes})`) as Array<{ n: number }>;
+    return row.n;
+  } catch {
+    return null;
   }
 }

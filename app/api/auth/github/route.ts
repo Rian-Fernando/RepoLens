@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomBytes } from "node:crypto";
-import { oauthConfigured, STATE_COOKIE } from "@/lib/oauth";
+import { oauthConfigured, safeReturnPath, STATE_COOKIE } from "@/lib/oauth";
 import { SITE_URL } from "@/lib/site";
 
 /** Kick off GitHub OAuth. ?returnTo=/u/foo brings the visitor back afterwards. */
@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   if (!oauthConfigured()) {
     return NextResponse.json({ error: "GitHub sign-in is not configured on this deployment." }, { status: 503 });
   }
-  const returnTo = req.nextUrl.searchParams.get("returnTo") ?? "/";
+  const returnTo = safeReturnPath(req.nextUrl.searchParams.get("returnTo"));
   const state = `${randomBytes(16).toString("hex")}:${encodeURIComponent(returnTo)}`;
 
   const origin = process.env.NODE_ENV === "development" ? req.nextUrl.origin : SITE_URL;

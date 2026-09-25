@@ -74,6 +74,7 @@ export default function MatchView() {
         <div className="flex items-center justify-between gap-3">
           <span className="text-xs" style={{ color: "var(--text-muted)" }}>
             {jd.trim().length < 80 ? `${Math.max(0, 80 - jd.trim().length)} more characters needed` : "ready"}
+            {" · "}remove names, emails and phone numbers before pasting
           </span>
           <button
             type="submit"

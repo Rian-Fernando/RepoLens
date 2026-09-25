@@ -44,3 +44,13 @@ export async function sessionLogin(): Promise<string | null> {
   const user = await res.json();
   return typeof user.login === "string" ? user.login : null;
 }
+
+/**
+ * Only same-site paths may be used as a post-login destination. "//host" and
+ * "/\\host" are protocol-relative URLs that browsers resolve to another origin,
+ * so a plain startsWith("/") check is an open redirect.
+ */
+export function safeReturnPath(value: string | null | undefined): string {
+  if (!value || !/^\/(?![\/\\])/.test(value) || /[\u0000-\u001f]/.test(value)) return "/";
+  return value;
+}

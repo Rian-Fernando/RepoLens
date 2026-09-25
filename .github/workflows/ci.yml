@@ -1,6 +1,10 @@
 name: CI
 on: [push, pull_request]
 
+# Least privilege: the job only needs to read the repository.
+permissions:
+  contents: read
+
 jobs:
   build-and-smoke:
     runs-on: ubuntu-latest

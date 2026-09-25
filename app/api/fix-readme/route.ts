@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateJson, GeminiError } from "@/lib/gemini";
+import { geminiAllowedFor, overLimit } from "@/lib/guard";
 
 export const maxDuration = 60;
+
+/**
+ * Gemini is only called when (a) the visitor is outside the EEA, UK and
+ * Switzerland — the free tier may not serve users there under the Gemini API
+ * terms — and (b) the visitor is under the hourly AI cap. Otherwise the
+ * built-in rules engine answers, so the feature still works for everyone.
+ * Prompts carry no names, bios or usernames: the free tier's terms say not to
+ * submit personal information.
+ */
+const AI_CALLS_PER_VISITOR_PER_HOUR = 30;
 
 interface FixRequest {
   repoName: string;
@@ -23,6 +34,7 @@ const SCHEMA = {
 
 const SYSTEM = `You write excellent GitHub READMEs. Given repo metadata, produce a complete, ready-to-commit README.md.
 Structure: # title + one-line pitch · badges placeholder comment · Features · Quick start (install/run commands appropriate to the language) · Usage example with a code block · a "Screenshots" section with an HTML comment telling the author what to capture · Roadmap (3 items) · License line.
+For the clone command use exactly: git clone https://github.com/OWNER/REPO.git (the literal words OWNER and REPO) — they are filled in afterwards.
 Rules: never invent features that aren't implied by the name/description/topics — where you must assume, mark it with a "<!-- TODO: verify -->" comment. Keep it under 120 lines. No preamble — output only the file content.`;
 
 function templateReadme(r: FixRequest): string {
@@ -73,10 +85,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Send repo metadata as the request body." }, { status: 400 });
   }
 
+  if (!geminiAllowedFor(req) || (await overLimit(req, "ai", AI_CALLS_PER_VISITOR_PER_HOUR, 60))) {
+    return NextResponse.json({ readme: templateReadme(body), engine: "rules" });
+  }
+
   try {
     const result = await generateJson<{ readme: string }>({
       system: SYSTEM,
-      prompt: `Repo: ${body.login}/${body.repoName}
+      prompt: `Repo name: ${body.repoName}
 Description: ${body.description ?? "none"}
 Primary language: ${body.language ?? "unknown"}
 Topics: ${body.topics.join(", ") || "none"}
@@ -86,7 +102,9 @@ Current README problems: ${body.findings.join("; ") || "missing entirely"}
 Write the README.md now.`,
       schema: SCHEMA,
     });
-    return NextResponse.json({ readme: result.readme, engine: "gemini" });
+    // the owner's username never went to Gemini; it's substituted in here
+    const readme = result.readme.replaceAll("github.com/OWNER/REPO", `github.com/${body.login}/${body.repoName}`);
+    return NextResponse.json({ readme, engine: "gemini" });
   } catch (e) {
     if (!(e instanceof GeminiError)) console.error("fix-readme failed", e);
     return NextResponse.json({ readme: templateReadme(body), engine: "rules" });

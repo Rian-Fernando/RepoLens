@@ -1,8 +1,8 @@
 import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { collect } from "@/lib/github";
-import { analyze } from "@/lib/analyze";
+import { getCachedAnalysis } from "@/lib/db";
+import type { Analysis } from "@/lib/types";
 import { getTier } from "@/lib/tiers";
 import { estimatePercentile } from "@/lib/percentile";
 
@@ -39,8 +39,11 @@ export default async function OgImage({ params }: { params: Promise<{ username: 
   } | null = null;
 
   try {
-    const collected = await collect(username, process.env.GITHUB_TOKEN?.trim() || undefined);
-    const a = analyze(collected);
+    // Link unfurlers (LinkedIn, Slack, X) fetch this automatically, so it must
+    // never trigger a GitHub crawl: it renders from the latest cached analysis.
+    const cached = await getCachedAnalysis(username, 60 * 24 * 365 * 10);
+    if (!cached) throw new Error("not analyzed yet");
+    const a = cached.data as Analysis;
     data = {
       login: a.profile.login,
       name: a.profile.name,
