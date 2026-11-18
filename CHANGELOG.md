@@ -3,6 +3,15 @@
 All notable changes to RepoLens. Dates are release dates; the live app updates on every
 push to `main`.
 
+## 2026-11-18 — Security patch
+
+- `next` 15.5.26 → 15.5.29 and `@sentry/nextjs` 10.65.0 → 10.78.0 (patch-level), clearing two
+  critical advisories — a Next.js image-optimization remote-code-execution bug and a Sentry
+  middleware bypass — plus other Next.js, sharp and source-map-js advisories
+- Production `npm audit`: 2 critical / 3 high → 0 critical / 1 high. The remaining high is
+  the PostCSS copy bundled inside Next.js 15, which only the Next.js 16 upgrade replaces
+- Dependabot alerts and security updates are now enabled for the repository
+
 ## 2026-09-25 — Compliance pass
 
 GitHub API — brought in line with GitHub's REST API best practices and rate-limit rules:
