@@ -11,6 +11,8 @@ push to `main`.
 - Production `npm audit`: 2 critical / 3 high → 0 critical / 1 high. The remaining high is
   the PostCSS copy bundled inside Next.js 15, which only the Next.js 16 upgrade replaces
 - Dependabot alerts and security updates are now enabled for the repository
+- Fixed: shared-report preview cards (`/u/<username>/opengraph-image`) returned 500 on Vercel —
+  the fonts were never packaged into that function, so link previews showed no card
 
 ## 2026-09-25 — Compliance pass
 

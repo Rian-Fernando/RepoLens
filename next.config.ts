@@ -1,6 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // The OG image routes read their fonts from disk. Next's file tracer follows
+  // those reads in regular route handlers but not in metadata image routes, so
+  // the dynamic per-user card shipped without its fonts (ENOENT on Vercel).
+  outputFileTracingIncludes: {
+    "/u/*/opengraph-image": ["./assets/fonts/**/*"],
+    "/opengraph-image": ["./assets/fonts/**/*"],
+  },
   images: {
     remotePatterns: [
       {
