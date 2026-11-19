@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: `How to make your GitHub recruiter-ready — ${SITE_NAME}`,
+  title: `How to make your GitHub recruiter-ready · ${SITE_NAME}`,
   description:
     "What recruiters actually look at in a GitHub profile, the seven things that score points, and the fixes that take under an hour.",
   alternates: { canonical: "/guide" },

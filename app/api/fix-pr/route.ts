@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
         title: body.title,
         head: branch,
         base,
-        body: `Drafted with [RepoLens](https://repolens.rianfernando.com/u/${owner}) — review, tweak, and merge.\n\n> Generated from the repo's public metadata; anything marked \`TODO\` needs your eyes.`,
+        body: `Drafted with [RepoLens](https://repolens.rianfernando.com/u/${owner}). Review it and tweak it before merging.\n\n> Generated from the repo's public metadata; anything marked \`TODO\` needs your eyes.`,
       }),
     });
 
@@ -125,8 +125,8 @@ export async function POST(req: NextRequest) {
       {
         error:
           status === 404
-            ? "Repo not found under your account — PRs can only be opened on your own repos."
-            : "PR creation failed — check the repo isn't archived and try again.",
+            ? "Repo not found under your account. Pull requests can only be opened on your own repos."
+            : "Couldn't open the pull request. Check the repo isn't archived and try again.",
       },
       { status },
     );

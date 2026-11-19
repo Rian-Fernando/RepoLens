@@ -9,7 +9,7 @@ export function buildMarkdownReport(a: Analysis, s: Suggestions | null): string 
   const lines: string[] = [
     `# RepoLens report for @${a.profile.login}`,
     "",
-    `**Score: ${a.overallScore}/100 (${tier.label})**${a.bench?.percentile != null ? ` · better than ${a.bench.percentile}% of ${a.bench.sample} analyzed profiles` : ""}`,
+    `**Score: ${a.overallScore}/100 (${tier.name})**${a.bench?.percentile != null ? ` · better than ${a.bench.percentile}% of ${a.bench.sample} analyzed profiles` : ""}`,
     "",
     `Languages: ${a.languages.map((l) => `${l.name} ${l.percent}%`).join(" · ") || "n/a"}`,
     `Activity: ${a.commits.last90Days} commits in the last 90 days (${a.commits.totalSampled} sampled)`,

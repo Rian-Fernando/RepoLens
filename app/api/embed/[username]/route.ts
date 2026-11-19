@@ -27,7 +27,7 @@ export async function GET(
   const safe = username.replace(/[^a-zA-Z0-9-]/g, "");
 
   const html = `<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><title>RepoLens — @${safe}</title></head>
+<html lang="en"><head><meta charset="utf-8"><title>RepoLens · @${safe}</title></head>
 <body style="margin:0;background:#0d1117;font-family:ui-monospace,'JetBrains Mono',monospace">
 <a href="${SITE_URL}/u/${safe}" target="_blank" rel="noopener" style="text-decoration:none;color:#f0f4fa;display:flex;align-items:center;gap:14px;padding:16px 18px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:radial-gradient(ellipse 70% 90% at 10% 0%,rgba(121,184,255,.14),transparent),#0d1117">
   <img src="https://github.com/${safe}.png?size=96" width="48" height="48" style="border-radius:999px;border:2px solid rgba(255,255,255,.18)" alt="">

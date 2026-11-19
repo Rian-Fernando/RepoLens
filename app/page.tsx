@@ -9,10 +9,10 @@ const DESCRIPTION =
   "RepoLens scores any public GitHub profile out of 100 on how it reads to recruiters: repository quality, README quality, commit habits and collaboration. Then it drafts the fixes and suggests five projects to build next. Free.";
 
 export const metadata: Metadata = {
-  title: `${SITE_NAME} — score your GitHub profile out of 100, free`,
+  title: `${SITE_NAME}: score your GitHub profile out of 100, free`,
   description: DESCRIPTION,
   alternates: { canonical: "/" },
-  openGraph: { title: `${SITE_NAME} — GitHub portfolio analyzer`, description: DESCRIPTION },
+  openGraph: { title: `${SITE_NAME}: GitHub portfolio analyzer`, description: DESCRIPTION },
 };
 
 const APP_LD = {

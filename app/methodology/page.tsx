@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: `How scoring works — ${SITE_NAME}`,
+  title: `How scoring works · ${SITE_NAME}`,
   description:
     "The exact weights behind every RepoLens score: repo quality, activity, coverage, collaboration and commit messages, plus how tiers, percentiles and the leaderboard are worked out.",
   alternates: { canonical: "/methodology" },

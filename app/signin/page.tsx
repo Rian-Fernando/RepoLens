@@ -5,7 +5,7 @@ import { safeReturnPath, sessionLogin, signInConfigured } from "@/lib/oauth";
 import { SITE_NAME } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: `Sign in with GitHub — ${SITE_NAME}`,
+  title: `Sign in with GitHub · ${SITE_NAME}`,
   description:
     "Live analysis on RepoLens needs a GitHub sign-in. Why, what RepoLens can and can't see, and where your sign-in is kept.",
   alternates: { canonical: "/signin" },

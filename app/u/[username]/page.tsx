@@ -13,7 +13,7 @@ export async function generateMetadata({
   const { username } = await params;
   const description = `RepoLens portfolio report for GitHub user ${username}: a 0-100 score covering repository quality, README quality, commit habits, language breadth and open-source collaboration, plus the specific fixes and five projects that would improve it.`;
   return {
-    title: `${username}'s GitHub portfolio score — ${SITE_NAME}`,
+    title: `${username}'s GitHub portfolio score · ${SITE_NAME}`,
     description,
     twitter: { card: "summary_large_image" },
     alternates: { canonical: `/u/${username}` },

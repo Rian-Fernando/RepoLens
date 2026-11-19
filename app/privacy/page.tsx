@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SITE_NAME } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: `Privacy — ${SITE_NAME}`,
+  title: `Privacy · ${SITE_NAME}`,
   description:
     "What RepoLens reads, what it stores, which services it uses, and how to have a GitHub profile removed from RepoLens.",
   alternates: { canonical: "/privacy" },

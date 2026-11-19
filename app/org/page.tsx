@@ -4,7 +4,7 @@ import PausedNotice from "@/components/PausedNotice";
 import { SITE_NAME } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: `Rank a cohort of GitHub profiles — ${SITE_NAME}`,
+  title: `Rank a cohort of GitHub profiles · ${SITE_NAME}`,
   description:
     "Paste a list of GitHub usernames and get the whole group scored, ranked and exportable as CSV. For bootcamps, clubs and hackathon judging.",
   alternates: { canonical: "/org" },

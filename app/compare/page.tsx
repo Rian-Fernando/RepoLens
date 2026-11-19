@@ -13,10 +13,10 @@ export async function generateMetadata({
   const battle = VALID.test(a) && VALID.test(b);
   return {
     title: battle
-      ? `@${a} vs @${b} — GitHub portfolio comparison`
-      : `Compare two GitHub profiles head-to-head — ${SITE_NAME}`,
+      ? `@${a} vs @${b}: GitHub portfolio comparison`
+      : `Compare two GitHub profiles head-to-head · ${SITE_NAME}`,
     description:
-      "Compare two GitHub profiles side by side: portfolio score, stars, repository count, recent commits, average repository quality and README coverage. Free, no sign-up.",
+      "Compare two GitHub profiles side by side: portfolio score, stars, repository count, recent commits, average repository quality and README coverage. Free.",
     alternates: { canonical: "/compare" },
     ...(battle
       ? {

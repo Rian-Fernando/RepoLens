@@ -94,7 +94,7 @@ export default function OrgView() {
       .filter((r) => r.score !== null)
       .map(
         (r, i) =>
-          `${i + 1},${r.login},${r.score},${getTier(r.score!).label},${r.language ?? ""},${r.readmes},https://repolens.rianfernando.com/u/${r.login}`,
+          `${i + 1},${r.login},${r.score},${getTier(r.score!).name},${r.language ?? ""},${r.readmes},https://repolens.rianfernando.com/u/${r.login}`,
       )
       .join("\n");
     const blob = new Blob([header + body], { type: "text/csv" });

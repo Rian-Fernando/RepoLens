@@ -3,7 +3,7 @@
 All notable changes to RepoLens. Dates are release dates; the live app updates on every
 push to `main`.
 
-## Unreleased: sign in with GitHub, and a plainer design
+## 2026-11-19: Sign in with GitHub, and a plainer design
 
 - Live analysis is back behind "Sign in with GitHub", through a GitHub App that requests no
   permissions. Each analysis runs on the signed-in visitor's own GitHub rate limit, and
@@ -23,7 +23,7 @@ push to `main`.
 - Fixed: the leaderboard's first row had a bright divider; tier chips in sentence case; the
   cohort page's organization field (retired in September) is gone
 
-## 2026-11-19 — Next.js 16, Sentry removed
+## 2026-11-19: Next.js 16, Sentry removed
 
 - Upgraded to Next.js 16 (Dependabot security PR #13), clearing the last high-severity advisory
   — the PostCSS copy bundled inside Next.js 15. Builds now use Turbopack
@@ -33,7 +33,7 @@ push to `main`.
 - GitHub is never crawled anonymously: a live analysis needs a token, so nothing can reach
   GitHub's shared 60-requests-an-hour anonymous limit from this deployment
 
-## 2026-11-18 — Security patch
+## 2026-11-18: Security patch
 
 - `next` 15.5.26 → 15.5.29 and `@sentry/nextjs` 10.65.0 → 10.78.0 (patch-level), clearing two
   critical advisories — a Next.js image-optimization remote-code-execution bug and a Sentry
@@ -44,7 +44,7 @@ push to `main`.
 - Fixed: shared-report preview cards (`/u/<username>/opengraph-image`) returned 500 on Vercel —
   the fonts were never packaged into that function, so link previews showed no card
 
-## 2026-09-25 — Compliance pass
+## 2026-09-25: Compliance pass
 
 GitHub API — brought in line with GitHub's REST API best practices and rate-limit rules:
 - Requests are made one at a time instead of ~36 concurrently per analysis
@@ -73,7 +73,7 @@ Security and privacy:
 - Per-person report pages are `noindex`
 - `NOTICE.md` corrected: the analysis cache is not "short-lived"
 
-## 2026-09-11 — GitHub API access paused
+## 2026-09-11: GitHub API access paused
 
 - Global kill switch in `lib/github.ts`, defaulting to **off**: no request
   reaches api.github.com unless `GITHUB_API_ENABLED=true` is set explicitly
@@ -85,7 +85,7 @@ Security and privacy:
 - Organization member lookup (the one call the browser made directly to
   GitHub) is retired; pasted username lists still work
 
-## 2026-08-02 — Feedback widget
+## 2026-08-02: Feedback widget
 
 - [Feedex](https://feedex.rianfernando.com) widget on every page, loaded with
   `next/script` at `lazyOnload` so it stays off the critical path
@@ -93,7 +93,7 @@ Security and privacy:
   matcher is distinguishable from feedback about a shared report
 - Env-gated on `NEXT_PUBLIC_FEEDEX_KEY`: unset, nothing renders
 
-## 2026-07-30 — GEO readiness and a real home page
+## 2026-07-30: GEO readiness and a real home page
 
 - `/llms.txt` following the llms.txt convention, so answer engines can read a factual,
   quotable summary without executing JavaScript
@@ -107,7 +107,7 @@ Security and privacy:
 - Descriptive page titles, image dimensions and lazy decoding (CLS), and a brand-colored
   `:focus-visible` ring
 
-## 2026-07-14 — Transparency
+## 2026-07-14: Transparency
 
 - [Methodology page](https://repolens.rianfernando.com/methodology) publishing every scoring
   weight, tier threshold, percentile calculation, and the limits of what RepoLens can see
@@ -115,7 +115,7 @@ Security and privacy:
   calibration rather than a bug
 - Sentry wired through instrumentation hooks, inert unless a DSN is configured
 
-## 2026-07-12 — Scoring v2, job matching, cohorts
+## 2026-07-12: Scoring v2, job matching, cohorts
 
 - **Scoring v2**: collaboration signals (merged pull requests, issues and reviews in other
   people's repositories), commit-message craft, and profile-README detection. Overall score
@@ -130,13 +130,13 @@ Security and privacy:
 - Analysis caching, stale-serving under rate limits, compare OG cards, score history,
   Markdown export, and a `/guide` article
 
-## 2026-07-11 — Search-engine readiness
+## 2026-07-11: Search-engine readiness
 
 - Sitemap, robots, canonical URLs and `metadataBase` on the production domain
 - Site-wide 1200×630 PNG Open Graph card; `*.vercel.app` redirects to the canonical domain
 - `WebApplication` JSON-LD
 
-## 2026-07-10 — First public release
+## 2026-07-10: First public release
 
 - Profile scoring 0–100 with per-repository quality, README grading, commit habits,
   language breakdown and coverage gap detection

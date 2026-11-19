@@ -4,7 +4,7 @@ import { getTier } from "@/lib/tiers";
 import { SITE_NAME } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: `Top-scoring GitHub portfolios — ${SITE_NAME}`,
+  title: `Top-scoring GitHub portfolios · ${SITE_NAME}`,
   description:
     "Every GitHub profile analyzed by RepoLens, ranked by portfolio score and grouped into tiers. Filter by primary language to see the top Python, JavaScript, TypeScript or Rust portfolios.",
   alternates: { canonical: "/leaderboard" },
