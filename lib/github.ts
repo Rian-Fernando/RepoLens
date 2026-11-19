@@ -32,6 +32,9 @@ export const DEEP_DIVE_LIMIT = 12;
  */
 export const GITHUB_API_ENABLED = process.env.GITHUB_API_ENABLED === "true";
 
+export const SIGN_IN_MESSAGE =
+  "Analyzing a new profile needs a GitHub sign-in. Profiles that were already analyzed still open without one.";
+
 export const GITHUB_PAUSED_MESSAGE =
   "Live GitHub analysis is paused on this deployment. Reports already in the cache still open normally.";
 
@@ -193,6 +196,11 @@ export async function collect(username: string, visitorToken?: string): Promise<
   const ctx: CallContext = visitorToken
     ? { token: visitorToken, shared: false }
     : { token: process.env.GITHUB_TOKEN?.trim() || undefined, shared: true };
+
+  // Never crawl anonymously. GitHub allows 60 anonymous requests an hour per
+  // address and an analysis needs ~42; serverless hosts also share their
+  // outbound addresses with other sites. No token means no crawl.
+  if (!ctx.token) throw new GitHubError(SIGN_IN_MESSAGE, 401);
 
   if (ctx.shared && (await githubBreakerOpenUntil())) {
     throw new GitHubError("RepoLens has paused GitHub requests to stay inside GitHub's rate limits. Please try again later.", 429);
