@@ -45,7 +45,7 @@ function H2({ id, children }: { id: string; children: React.ReactNode }) {
 
 export default function HomeContent() {
   return (
-    <div className="print-hide max-w-3xl pb-8">
+    <div className="print-hide max-w-3xl mx-auto pb-8">
       <section aria-labelledby="idea" className="mt-28">
         <H2 id="idea">Where the idea came from</H2>
         <div className="mt-6 space-y-4 text-lg leading-relaxed" style={{ color: "var(--text-secondary)" }}>

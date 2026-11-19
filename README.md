@@ -137,7 +137,7 @@ lib/
   suggest-fallback.ts      the $0 rules engine
   gemini.ts                minimal Gemini REST client, no SDK
   db.ts                    Neon: scores, analysis cache, watch subscriptions
-components/                charts, fix kit, role radar, sign-in
+components/                charts, fix kit, role radar, sign-in, starfield
 design/                    brand handoff — logo, palette, type scale
 ```
 

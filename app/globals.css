@@ -11,6 +11,7 @@
   --page: #08080c;
   --surface-1: #0f0f15;
   --glass: #0f0f15; /* legacy alias — cards are flat now */
+  --card: #0c0c11;
   --text-primary: #ececf4;
   --text-secondary: #a8a8b8;
   --text-muted: #7d7d8e;
@@ -104,7 +105,7 @@ h3 {
 /* ---------- surfaces ---------- */
 
 .card {
-  background: rgba(255, 255, 255, 0.015);
+  background: var(--card);
   border: 1px solid var(--border);
   border-radius: 20px;
 }
@@ -184,7 +185,7 @@ h3 {
 .input-dark {
   appearance: none;
   -webkit-appearance: none;
-  background-color: transparent;
+  background-color: var(--card);
   border: 1px solid var(--border-bright);
   border-radius: 12px;
   color: var(--text-primary);
@@ -272,6 +273,7 @@ select.input-dark option {
     --page: #ffffff;
     --surface-1: #ffffff;
     --glass: #ffffff;
+    --card: #ffffff;
     --text-primary: #0b0b0b;
     --text-secondary: #52514e;
     --text-muted: #8b949e;

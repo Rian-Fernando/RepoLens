@@ -7,7 +7,7 @@ import { GITHUB_API_ENABLED } from "@/lib/github";
 export default function PausedNotice() {
   if (GITHUB_API_ENABLED) return null;
   return (
-    <div role="status" className="rounded-2xl border px-5 py-4 mb-6 text-sm print-hide" style={{ borderColor: "var(--border-bright)" }}>
+    <div role="status" className="rounded-2xl border px-5 py-4 mb-6 text-sm print-hide" style={{ borderColor: "var(--border-bright)", background: "var(--card)" }}>
       <p className="font-medium">Live analysis is paused</p>
       <p className="mt-1 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
         RepoLens isn&apos;t contacting GitHub at the moment, so new profiles can&apos;t be scored. Reports that

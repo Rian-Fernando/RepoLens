@@ -4,6 +4,7 @@ import { Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import Background from "@/components/Background";
 import Logo from "@/components/Logo";
 import Nav from "@/components/Nav";
 import AuthButton from "@/components/AuthButton";
@@ -42,6 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${sans.variable} ${serif.variable} ${mono.variable}`}>
       <body className="min-h-screen flex flex-col">
+        <Background />
         <header
           className="sticky top-0 z-20 border-b print-hide"
           style={{ borderColor: "var(--border)", background: "var(--page)" }}

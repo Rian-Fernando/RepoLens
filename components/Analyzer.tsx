@@ -157,11 +157,11 @@ export default function Analyzer({
   return (
     <div className="space-y-8">
       {/* input */}
-      <section className={`print-hide ${analysis || !hero ? "" : "pt-12 sm:pt-20 max-w-3xl"}`}>
+      <section className={`print-hide ${analysis || !hero ? "" : "pt-14 sm:pt-24 max-w-3xl mx-auto text-center"}`}>
         {!analysis && hero && (
           <div>
             <h1 className="text-5xl sm:text-7xl leading-[1.02]">What does your GitHub say about you?</h1>
-            <p className="mt-6 text-lg leading-relaxed max-w-2xl" style={{ color: "var(--text-secondary)" }}>
+            <p className="mt-6 text-lg leading-relaxed max-w-2xl mx-auto" style={{ color: "var(--text-secondary)" }}>
               RepoLens reads a public GitHub profile the way a recruiter would, scores it out of 100, and shows you
               exactly what&apos;s costing you points. Then it drafts the fixes.
             </p>
@@ -172,7 +172,7 @@ export default function Analyzer({
             e.preventDefault();
             void run(username, role);
           }}
-          className={`${analysis || !hero ? "" : "mt-9 max-w-2xl"}`}
+          className={`${analysis || !hero ? "" : "mt-9 max-w-2xl mx-auto"}`}
         >
           <div className="flex flex-col sm:flex-row gap-2">
             <input
@@ -230,7 +230,7 @@ export default function Analyzer({
               <a href={`/signin?returnTo=${encodeURIComponent(analysis ? `/u/${analysis.profile.login}` : "/")}`} className="link">
                 GitHub sign-in
               </a>
-              . Profiles that were already analyzed open without one.
+              .{!hero || analysis ? " Profiles that were already analyzed open without one." : ""}
             </p>
           ) : null}
 
@@ -242,13 +242,13 @@ export default function Analyzer({
         </form>
 
         {needsSignIn ? (
-          <div className="mt-6 max-w-3xl">
+          <div className={`mt-6 max-w-3xl text-left ${hero && !analysis ? "mx-auto" : ""}`}>
             <SignInPrompt returnTo={`/u/${needsSignIn}`} />
           </div>
         ) : null}
 
         {phase === "analyzing" && !analysis && (
-          <p className="mt-8 flex items-center gap-3 text-sm" style={{ color: "var(--text-secondary)" }}>
+          <p className={`mt-8 flex items-center gap-3 text-sm ${hero ? "justify-center" : ""}`} style={{ color: "var(--text-secondary)" }}>
             <span className="spinner" aria-hidden />
             Reading {username.trim() || "the profile"}&apos;s public repositories. A fresh analysis takes about 20
             seconds.

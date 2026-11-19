@@ -68,7 +68,8 @@ as a checklist, never as a verdict.
 
 Built with [Next.js](https://nextjs.org), [React](https://react.dev),
 [TypeScript](https://www.typescriptlang.org), [Tailwind CSS](https://tailwindcss.com),
-[Recharts](https://recharts.org) and the [Neon serverless driver](https://neon.tech).
+[Recharts](https://recharts.org), [three.js](https://threejs.org) and the
+[Neon serverless driver](https://neon.tech).
 Typefaces are [Inter](https://fonts.google.com/specimen/Inter),
 [Instrument Serif](https://fonts.google.com/specimen/Instrument+Serif),
 [JetBrains Mono](https://www.jetbrains.com/lp/mono/) and, on the preview images,

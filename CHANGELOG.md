@@ -13,10 +13,11 @@ push to `main`.
 - New `/signin` page explaining why live analysis needs a sign-in, what RepoLens can see, and
   where the sign-in is kept. The pasted-token field is gone
 - Search queries use explicit `is:pr` / `is:issue`, which GitHub App user tokens require
-- The design now matches rianfernando.com: Instrument Serif headings, Inter text, JetBrains
-  Mono only for numbers and tags, flat cards, pill buttons. Removed the starfield, gradients,
-  glow, glass cards, marquee, uppercase eyebrow labels, emoji icons and entrance animations,
-  along with three.js, anime.js and ldrs
+- A plainer, less templated design: Instrument Serif headings, Inter text, JetBrains Mono only
+  for numbers and tags, solid cards and pill buttons. The centered home page and the three.js
+  starfield stay (now with round, soft stars); the gradients, glowing orbs, glass cards,
+  marquee, uppercase eyebrow labels, emoji icons and entrance animations are gone, along with
+  anime.js and ldrs
 - Copy rewritten in a plainer voice across the home page, guide, methodology, privacy page,
   FAQ, reports and rules engine; Gemini prompts now ask for plain sentences
 - Fixed: the leaderboard's first row had a bright divider; tier chips in sentence case; the
