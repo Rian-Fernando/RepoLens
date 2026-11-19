@@ -218,7 +218,7 @@ function detectGaps(collected: Collected, repos: RepoAnalysis[]): GapItem[] {
     /(jest|vitest|pytest|unittest|mocha|junit|rspec|testing|test suite|unit test|integration test|coverage)/.test(haystack),
     "Testing",
     "At least one project mentions automated tests.",
-    "No project mentions automated tests — a tested project is a strong hiring signal.",
+    "No project mentions automated tests. A tested project is a strong hiring signal.",
     "serious",
   );
   push(
@@ -226,14 +226,14 @@ function detectGaps(collected: Collected, repos: RepoAnalysis[]): GapItem[] {
     /(github actions|workflow|ci\/cd|continuous integration|travis|circleci|\.github\/workflows)/.test(haystack),
     "CI/CD",
     "Continuous integration shows up in your projects.",
-    "No CI/CD detected — a simple GitHub Actions workflow shows engineering maturity.",
+    "No CI/CD detected. A simple GitHub Actions workflow shows you work the way teams do.",
   );
   push(
     "demo",
     repos.some((r) => Boolean(r.homepage)),
     "Deployed demos",
     "At least one repo links to a live demo.",
-    "No repo links to a live deployment — recruiters click links before they read code.",
+    "No repo links to a live deployment, and people click links before they read code.",
     "serious",
   );
   push(
@@ -249,14 +249,14 @@ function detectGaps(collected: Collected, repos: RepoAnalysis[]): GapItem[] {
       ["go", "java", "ruby", "php", "c#"].some((l) => langs.has(l)),
     "Backend / API work",
     "Backend or API work is visible.",
-    "No clear backend/API project — pair one with your frontend work.",
+    "No clear backend or API project. Pair one with your frontend work.",
   );
   push(
     "docker",
     /(docker|container|kubernetes|dockerfile|compose)/.test(haystack),
     "Containers / DevOps",
     "Container or DevOps experience is visible.",
-    "No Docker/containerization visible — even one Dockerfile broadens your profile.",
+    "No Docker or containers visible. Even one Dockerfile broadens your profile.",
   );
   push(
     "data",
@@ -264,28 +264,28 @@ function detectGaps(collected: Collected, repos: RepoAnalysis[]): GapItem[] {
       langs.has("jupyter notebook"),
     "Data / AI",
     "Data or AI work is visible.",
-    "No data/AI project detected — a small applied-AI project rounds out a modern portfolio.",
+    "No data or AI project detected. A small applied-AI project rounds out a portfolio.",
   );
   push(
     "profile-readme",
     collected.hasProfileReadme,
     "Profile README",
     "Your username/username profile README exists.",
-    "No profile README — it's the most-viewed page on your GitHub. Create a username/username repo with a README.",
+    "No profile README, even though it's the most-viewed page on your GitHub. Create a username/username repo with a README.",
   );
   push(
     "collab",
     (collected.collab.mergedPrsElsewhere ?? 0) >= 1,
     "Open-source collaboration",
     "You have merged PRs in other people's projects.",
-    "No merged PRs outside your own repos — one upstream contribution carries outsized hiring weight.",
+    "No merged pull requests outside your own repos. One contribution to someone else's project counts for a lot.",
   );
   push(
     "license",
     repos.some((r) => r.hasLicense),
     "Open-source hygiene",
     "At least one repo carries a license.",
-    "None of your top repos has a license — adding one is a five-minute win.",
+    "None of your top repos has a license. Adding one takes five minutes.",
   );
 
   return gaps;

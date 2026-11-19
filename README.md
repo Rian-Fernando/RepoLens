@@ -3,14 +3,13 @@
 Scores any public GitHub profile **out of 100 the way a recruiter reads it** — repository
 quality, README quality, commit habits, collaboration — and then **doesn't stop at the
 diagnosis.** Every deducted point becomes a fix worth a known number of points, and the ones
-worth writing for you get written: READMEs, licenses, CI workflows, opened as real pull
-requests on your own repos.
+worth writing for you get written: READMEs, licenses and CI workflows, ready to commit.
 
 [![CI](https://github.com/Rian-Fernando/RepoLens/actions/workflows/ci.yml/badge.svg)](https://github.com/Rian-Fernando/RepoLens/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/Rian-Fernando/RepoLens/actions/workflows/codeql.yml/badge.svg)](https://github.com/Rian-Fernando/RepoLens/actions/workflows/codeql.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Cost to run: $0](https://img.shields.io/badge/cost%20to%20run-%240-3ddc97)](#the-zero-dollar-path)
-[![Sign-up required: none](https://img.shields.io/badge/sign--up-none-a78bfa)](https://repolens.rianfernando.com)
+[![Reports: no account needed](https://img.shields.io/badge/reports-no%20account%20needed-a78bfa)](https://repolens.rianfernando.com)
 [![Live](https://img.shields.io/badge/live-repolens.rianfernando.com-4cc9f0)](https://repolens.rianfernando.com)
 
 **▶ Live: [repolens.rianfernando.com](https://repolens.rianfernando.com)** · [How scoring works](https://repolens.rianfernando.com/methodology) · [The guide](https://repolens.rianfernando.com/guide) · [Leaderboard](https://repolens.rianfernando.com/leaderboard)
@@ -47,14 +46,14 @@ flowchart LR
   end
   subgraph Out["Outputs"]
     R["Report · roadmap · role radar"]
-    F["Fix Kit → real pull requests"]
+    F["Fix Kit → drafts to commit"]
     B["Score badge · OG cards · embed"]
     P["/api/score → CI check"]
   end
   G --> C --> S --> A --> R
   S --> D
   D -->|"real percentiles · history · leaderboard"| R
-  R --> F --> G
+  R --> F
   S --> B
   S --> P
 ```
@@ -74,15 +73,15 @@ quota exhausted? A cached report is served with its age labeled, rather than an 
 - **Ranks the fixes by value** — every gap becomes a checklist item labeled with its computed
   score gain ("fix the READMEs on 6 repos: **+13.5**"), saved locally so you can watch the
   number climb.
-- **Writes the fixes** — the Fix Kit drafts the missing README, MIT license and CI workflow;
-  signed in with GitHub, it opens them as **real pull requests** on repos you own.
+- **Writes the fixes** — the Fix Kit drafts the missing README, MIT license and CI workflow,
+  ready to copy into the repo.
 - **Matches a job post** — paste a job description and every requirement is mapped to concrete
   evidence in your repositories, or flagged as missing, with a readiness score.
 - **Keeps you honest over time** — score history, weekly re-score with an email when it moves,
   an embeddable score badge, and a `/api/score` endpoint plus workflow that fails CI when your
   portfolio quality drops.
-- **Scales to a room** — rank a whole GitHub organization or a pasted list of usernames, with
-  CSV export, for bootcamps, clubs and hackathon judging.
+- **Scales to a room** — rank a pasted list of usernames, with CSV export, for bootcamps,
+  clubs and hackathon judging.
 - **Roasts you, optionally** — the same analysis, delivered by a comedian instead of a coach.
   The resume bullets stay serious.
 
@@ -91,14 +90,14 @@ quota exhausted? A cached report is served with its age labeled, rather than an 
 | Layer | How it's free | Degrades to |
 |---|---|---|
 | Hosting | Vercel hobby tier | — |
-| Profile data | [GitHub REST API](https://docs.github.com/rest) — 60 req/hour anonymous, 5,000 with any token | cached report, age labeled |
+| Profile data | [GitHub REST API](https://docs.github.com/rest) via a no-permission GitHub App; each analysis runs on the signed-in visitor's own 5,000/hour | cached report |
 | Written analysis | [Google Gemini](https://ai.google.dev) free tier (~1,500 req/day, no card) | built-in rules engine |
 | Benchmarks & history | [Neon](https://neon.tech) Postgres free tier | estimated percentile curve |
 | Emails (optional) | [Resend](https://resend.com) free tier | feature hides itself |
-| Monitoring (optional) | Vercel Analytics · Speed Insights · Sentry free tiers | inert when unset |
+| Analytics (optional) | Vercel Web Analytics · Speed Insights | inert when unset |
 
-There is no paid plan, no account, and no key you must supply to use it. The app **never
-breaks and never bills anyone.**
+There is no paid plan. Opening reports needs no account; analyzing a new profile needs a free
+GitHub sign-in. The app **never breaks and never bills anyone.**
 
 ## Run it
 
@@ -108,9 +107,10 @@ npm run dev        # http://localhost:3000 — works immediately, rules-engine m
 ```
 
 For AI-written analysis (still free), copy `.env.local.example` to `.env.local` and add a
-`GEMINI_API_KEY` from [aistudio.google.com/apikey](https://aistudio.google.com/apikey). Every
-other variable is optional and documented in that file — the app is designed to run with none
-of them set.
+`GEMINI_API_KEY` from [aistudio.google.com/apikey](https://aistudio.google.com/apikey). For
+live analysis, create the GitHub App described in that file and set `GITHUB_APP_CLIENT_ID`,
+`GITHUB_APP_CLIENT_SECRET` and `GITHUB_API_ENABLED=true`. Without them the app runs in
+cache-only mode.
 
 ## Project structure
 
@@ -123,19 +123,21 @@ app/
   action/                  CI score-check workflow docs
   api/analyze              GitHub crawl + scoring, cache-first
   api/suggest              Gemini structured output → rules fallback
-  api/fix-readme fix-pr    AI drafts → real pull requests (GitHub OAuth)
+  api/fix-readme           AI README drafts, with a template fallback
+  api/auth/*  signin/      Sign in with GitHub (GitHub App, no permissions)
   api/score/[username]     public JSON score API (drives the CI check)
   api/badge api/embed      SVG score badge, iframe widget
   api/cron/watch           weekly re-score + email when a score moves
   llms.txt robots sitemap  discovery surface for search + answer engines
 lib/
-  github.ts                REST client, ~38 requests per analysis
+  github.ts                REST client: serial requests, rate-limit breaker
+  oauth.ts guard.ts        sign-in session, per-visitor limits
   analyze.ts               the scoring engine (repos, READMEs, habits, gaps)
   roadmap.ts               gaps → checklist items with computed point gains
   suggest-fallback.ts      the $0 rules engine
   gemini.ts                minimal Gemini REST client, no SDK
   db.ts                    Neon: scores, analysis cache, watch subscriptions
-components/                charts, fix kit, role radar, starfield, motion
+components/                charts, fix kit, role radar, sign-in
 design/                    brand handoff — logo, palette, type scale
 ```
 

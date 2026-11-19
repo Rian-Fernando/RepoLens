@@ -281,9 +281,11 @@ export async function collect(username: string, visitorToken?: string): Promise<
       return null;
     }
   };
-  const mergedPrsElsewhere = await searchCount(`author:${username} type:pr is:merged -user:${username}`);
-  const issuesElsewhere = await searchCount(`author:${username} type:issue -user:${username}`);
-  const reviewsElsewhere = await searchCount(`reviewed-by:${username} type:pr -author:${username}`);
+  // Explicit is:pr / is:issue qualifiers: with GitHub App user tokens, a search
+  // that could match both issues and pull requests is rejected with HTTP 422.
+  const mergedPrsElsewhere = await searchCount(`author:${username} is:pr is:merged -user:${username}`);
+  const issuesElsewhere = await searchCount(`author:${username} is:issue -user:${username}`);
+  const reviewsElsewhere = await searchCount(`reviewed-by:${username} is:pr -author:${username}`);
 
   return {
     user,

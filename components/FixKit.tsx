@@ -79,7 +79,7 @@ export default function FixKit({ repo, login }: { repo: RepoAnalysis; login: str
   const [readme, setReadme] = useState<string | null>(null);
   const [engine, setEngine] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [auth, setAuth] = useState<{ configured: boolean; login: string | null } | null>(null);
+  const [auth, setAuth] = useState<{ configured: boolean; login: string | null; prs?: boolean } | null>(null);
   const [prState, setPrState] = useState<{ busy?: boolean; url?: string; error?: string }>({});
 
   useEffect(() => {
@@ -87,7 +87,7 @@ export default function FixKit({ repo, login }: { repo: RepoAnalysis; login: str
     fetch("/api/auth/me")
       .then((r) => r.json())
       .then(setAuth)
-      .catch(() => setAuth({ configured: false, login: null }));
+      .catch(() => setAuth({ configured: false, login: null, prs: false }));
   }, [tab, auth]);
 
   async function draftReadme() {
@@ -110,10 +110,10 @@ export default function FixKit({ repo, login }: { repo: RepoAnalysis; login: str
         }),
       });
       const data = await res.json();
-      setReadme(data.readme ?? "Generation failed — try again.");
+      setReadme(data.readme ?? "The draft couldn't be written. Try again.");
       setEngine(data.engine ?? null);
     } catch {
-      setReadme("Generation failed — try again.");
+      setReadme("The draft couldn't be written. Try again.");
     } finally {
       setLoading(false);
     }
@@ -140,7 +140,7 @@ export default function FixKit({ repo, login }: { repo: RepoAnalysis; login: str
       if (res.ok) setPrState({ url: data.url });
       else setPrState({ error: data.error ?? "PR creation failed." });
     } catch {
-      setPrState({ error: "PR creation failed — network error." });
+      setPrState({ error: "The pull request couldn't be opened (network error)." });
     }
   }
 
@@ -153,7 +153,7 @@ export default function FixKit({ repo, login }: { repo: RepoAnalysis; login: str
           Fix kit:
         </span>
         <button type="button" onClick={draftReadme} className="btn-accent px-3 py-1.5 text-xs cursor-pointer">
-          ✦ Draft README{repo.readmeScore === null ? "" : " rewrite"}
+          Draft a {repo.readmeScore === null ? "README" : "better README"}
         </button>
         {!repo.hasLicense ? (
           <button type="button" onClick={() => { setTab("license"); setPrState({}); }} className="btn-ghost px-3 py-1.5 text-xs cursor-pointer">
@@ -182,7 +182,7 @@ export default function FixKit({ repo, login }: { repo: RepoAnalysis; login: str
                 <span>{engine === "gemini" ? "drafted by Gemini" : "template (add GEMINI_API_KEY for AI drafts)"}</span>
               ) : null}
               {content ? <CopyButton text={content} /> : null}
-              {content && auth?.configured ? (
+              {content && auth?.configured && auth.prs ? (
                 isOwnProfile ? (
                   prState.url ? (
                     <a href={prState.url} target="_blank" rel="noreferrer" className="btn-accent px-3 py-1.5 text-xs">
@@ -195,11 +195,11 @@ export default function FixKit({ repo, login }: { repo: RepoAnalysis; login: str
                       disabled={prState.busy}
                       className="btn-accent px-3 py-1.5 text-xs cursor-pointer disabled:opacity-60"
                     >
-                      {prState.busy ? "Opening PR…" : "⤴ Open as PR"}
+                      {prState.busy ? "Opening pull request…" : "Open as pull request"}
                     </button>
                   )
                 ) : auth.login ? (
-                  <span title={`Signed in as ${auth.login} — PRs only open on your own repos`}>
+                  <span title={`Signed in as ${auth.login}. Pull requests only open on your own repos.`}>
                     PRs: own profile only
                   </span>
                 ) : (

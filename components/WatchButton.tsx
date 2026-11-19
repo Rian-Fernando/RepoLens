@@ -37,7 +37,7 @@ export default function WatchButton({ login }: { login: string }) {
   if (state === "done") {
     return (
       <span className="font-mono-accent text-[11px] px-3 py-1.5" style={{ color: "var(--status-good)" }}>
-        ✓ watching — weekly email on change
+        Watching. You'll get an email when the score changes.
       </span>
     );
   }
@@ -58,13 +58,13 @@ export default function WatchButton({ login }: { login: string }) {
       </button>
       {state === "error" ? (
         <span className="text-[11px]" style={{ color: "var(--status-critical)" }}>
-          failed — retry
+          That didn't work. Try again.
         </span>
       ) : null}
     </form>
   ) : (
     <button type="button" onClick={() => setOpen(true)} className="btn-ghost px-3 py-1.5 text-xs cursor-pointer">
-      ⚯ Watch score
+      Watch score
     </button>
   );
 }

@@ -52,10 +52,10 @@ export default function GoalChip({ login, score }: { login: string; score: numbe
           setDraft(String(Math.min(100, score + 10)));
           setEditing(true);
         }}
-        className="font-mono-accent text-[11px] mt-1.5 cursor-pointer hover:underline print-hide"
+        className="text-xs mt-1.5 cursor-pointer hover:underline underline-offset-2 print-hide"
         style={{ color: "var(--text-muted)" }}
       >
-        + set a goal
+        Set a goal
       </button>
     );
   }
@@ -69,10 +69,10 @@ export default function GoalChip({ login, score }: { login: string; score: numbe
         setEditing(true);
       }}
       title="Click to change your goal"
-      className="font-mono-accent text-[11px] mt-1.5 cursor-pointer"
+      className="text-xs mt-1.5 cursor-pointer"
       style={{ color: reached ? "var(--status-good)" : "var(--text-muted)" }}
     >
-      {reached ? `✓ goal ${goal} reached — raise it?` : `goal ${goal} · ${goal - score} to go`}
+      {reached ? `Goal of ${goal} reached. Raise it?` : `Goal: ${goal} (${goal - score} to go)`}
     </button>
   );
 }

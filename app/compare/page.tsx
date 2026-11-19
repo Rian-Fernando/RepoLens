@@ -35,10 +35,11 @@ export default async function ComparePage({
   const { a = "", b = "" } = await searchParams;
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
-      <div className="text-center mb-8 reveal">
-        <h1 className="text-3xl font-semibold tracking-tight text-glow">Head to head</h1>
-        <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>
-          Two profiles enter. Seven categories. Best portfolio wins.
+      <div className="mb-10">
+        <h1 className="text-5xl sm:text-6xl">Compare two profiles</h1>
+        <p className="mt-4 text-lg leading-relaxed max-w-2xl" style={{ color: "var(--text-secondary)" }}>
+          Put two GitHub profiles side by side across seven categories, from the overall score to how many READMEs
+          actually do their job.
         </p>
       </div>
       <CompareView initialA={a} initialB={b} />

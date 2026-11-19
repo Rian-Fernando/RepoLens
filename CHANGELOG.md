@@ -3,6 +3,35 @@
 All notable changes to RepoLens. Dates are release dates; the live app updates on every
 push to `main`.
 
+## Unreleased: sign in with GitHub, and a plainer design
+
+- Live analysis is back behind "Sign in with GitHub", through a GitHub App that requests no
+  permissions. Each analysis runs on the signed-in visitor's own GitHub rate limit, and
+  nothing is ever crawled anonymously or with a shared token
+- Existing reports open for everyone, whatever their age, and viewing one never starts a crawl.
+  A signed-in visitor can re-analyze; 10 fresh analyses per person per hour
+- New `/signin` page explaining why live analysis needs a sign-in, what RepoLens can see, and
+  where the sign-in is kept. The pasted-token field is gone
+- Search queries use explicit `is:pr` / `is:issue`, which GitHub App user tokens require
+- The design now matches rianfernando.com: Instrument Serif headings, Inter text, JetBrains
+  Mono only for numbers and tags, flat cards, pill buttons. Removed the starfield, gradients,
+  glow, glass cards, marquee, uppercase eyebrow labels, emoji icons and entrance animations,
+  along with three.js, anime.js and ldrs
+- Copy rewritten in a plainer voice across the home page, guide, methodology, privacy page,
+  FAQ, reports and rules engine; Gemini prompts now ask for plain sentences
+- Fixed: the leaderboard's first row had a bright divider; tier chips in sentence case; the
+  cohort page's organization field (retired in September) is gone
+
+## 2026-11-19 — Next.js 16, Sentry removed
+
+- Upgraded to Next.js 16 (Dependabot security PR #13), clearing the last high-severity advisory
+  — the PostCSS copy bundled inside Next.js 15. Builds now use Turbopack
+- Removed Sentry: it was never configured, and its build plugin carried the last two moderate
+  advisories. Production `npm audit` is now clean
+- Removed the `lint` script — Next.js 16 dropped `next lint`, and ESLint was never set up
+- GitHub is never crawled anonymously: a live analysis needs a token, so nothing can reach
+  GitHub's shared 60-requests-an-hour anonymous limit from this deployment
+
 ## 2026-11-18 — Security patch
 
 - `next` 15.5.26 → 15.5.29 and `@sentry/nextjs` 10.65.0 → 10.78.0 (patch-level), clearing two

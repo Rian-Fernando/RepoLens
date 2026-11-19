@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Analysis } from "@/lib/types";
 import ScoreRing from "./ScoreRing";
 import { formatCompact } from "./StatTile";
+import SignInPrompt from "./SignInPrompt";
 
 async function analyzeUser(username: string): Promise<Analysis> {
   const res = await fetch("/api/analyze", {
@@ -12,7 +13,10 @@ async function analyzeUser(username: string): Promise<Analysis> {
     body: JSON.stringify({ username }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error((data as { error?: string }).error ?? "Analysis failed");
+  if (!res.ok) {
+    const d = data as { error?: string; needsSignIn?: boolean };
+    throw Object.assign(new Error(d.error ?? "Analysis failed"), { needsSignIn: Boolean(d.needsSignIn) });
+  }
   return data as Analysis;
 }
 
@@ -68,12 +72,14 @@ export default function CompareView({ initialA = "", initialB = "" }: { initialA
   const [b, setB] = useState<Analysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [needsSignIn, setNeedsSignIn] = useState(false);
 
   async function fight(e: React.FormEvent) {
     e.preventDefault();
     if (!nameA.trim() || !nameB.trim() || loading) return;
     setLoading(true);
     setError(null);
+    setNeedsSignIn(false);
     setA(null);
     setB(null);
     try {
@@ -81,7 +87,8 @@ export default function CompareView({ initialA = "", initialB = "" }: { initialA
       setA(ra);
       setB(rb);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Comparison failed.");
+      if (err && typeof err === "object" && "needsSignIn" in err && err.needsSignIn) setNeedsSignIn(true);
+      else setError(err instanceof Error ? err.message : "Comparison failed.");
     } finally {
       setLoading(false);
     }
@@ -92,7 +99,7 @@ export default function CompareView({ initialA = "", initialB = "" }: { initialA
 
   return (
     <div className="space-y-8">
-      <form onSubmit={fight} className="flex flex-col sm:flex-row items-center gap-2 max-w-2xl mx-auto reveal">
+      <form onSubmit={fight} className="flex flex-col sm:flex-row items-center gap-2 max-w-2xl">
         <input
           value={nameA}
           onChange={(e) => setNameA(e.target.value)}
@@ -122,24 +129,31 @@ export default function CompareView({ initialA = "", initialB = "" }: { initialA
           {loading ? "Analyzing…" : "Compare"}
         </button>
       </form>
+      {needsSignIn ? (
+        <SignInPrompt
+          returnTo={`/compare?a=${encodeURIComponent(nameA.trim())}&b=${encodeURIComponent(nameB.trim())}`}
+          message="At least one of these profiles hasn't been analyzed yet. Live analysis needs a GitHub sign-in; it only reads public data and runs on your own GitHub rate limit."
+        />
+      ) : null}
       {error ? (
-        <p className="text-sm text-center font-medium" style={{ color: "var(--status-critical)" }}>
+        <p className="text-sm" style={{ color: "var(--status-critical)" }}>
           {error}
         </p>
       ) : null}
       {loading ? (
-        <p className="text-sm text-center animate-pulse" style={{ color: "var(--text-muted)" }}>
-          Running both analyses against GitHub…
+        <p className="flex items-center gap-3 text-sm" style={{ color: "var(--text-secondary)" }}>
+          <span className="spinner" aria-hidden />
+          Analyzing both profiles…
         </p>
       ) : null}
 
       {a && b && (
-        <div className="card p-6 reveal">
+        <div className="card p-6">
           <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-4 mb-6">
             <Corner a={a} />
             <div className="self-center text-center px-2">
               <div className="text-2xl font-semibold tnum">
-                {wins} — {losses}
+                {wins}–{losses}
               </div>
               <div className="text-xs" style={{ color: "var(--text-muted)" }}>
                 categories won

@@ -36,7 +36,7 @@ const TEMPLATES: Template[] = [
     name: "A real REST API with auth",
     tagline: "Prove you can build the server side, not just call it.",
     description:
-      "Design a small but real API — auth (JWT or sessions), a database, input validation, rate limiting, and OpenAPI docs. Seed it with data from a public dataset so the demo is interesting.",
+      "Design a small but real API with auth (JWT or sessions), a database, input validation, rate limiting and OpenAPI docs. Seed it with data from a public dataset so the demo is interesting.",
     skills: ["API design", "Auth", "Databases", "Validation"],
     difficulty: "intermediate",
     stack: (l) => (l === "Python" ? ["FastAPI", "PostgreSQL", "Docker"] : ["Node.js", "PostgreSQL", "Docker"]),
@@ -58,7 +58,7 @@ const TEMPLATES: Template[] = [
     name: "Pipeline everything",
     tagline: "One workflow file per repo: lint, test, build, deploy.",
     description:
-      "Add a GitHub Actions workflow to your top three repos — lint + test on pull request, deploy on merge. Then write a short post in one README explaining the pipeline. Recruiters notice repeatability.",
+      "Add a GitHub Actions workflow to your top three repos that lints and tests every pull request and deploys on merge. Then write a short post in one README explaining the pipeline. Recruiters notice repeatability.",
     skills: ["CI/CD", "GitHub Actions", "Release discipline"],
     difficulty: "beginner",
     stack: () => ["GitHub Actions", "YAML"],
@@ -78,7 +78,7 @@ const TEMPLATES: Template[] = [
     id: "data",
     gap: "data",
     name: "Applied-AI feature, end to end",
-    tagline: "Not a model demo — a product feature that uses one.",
+    tagline: "Not a model demo, but a product feature that uses one.",
     description:
       "Build a small tool that applies an LLM or classic ML to a real dataset (e.g. summarize/classify data from a public API), with honest evaluation notes and a deployed demo behind a free-tier API.",
     skills: ["LLM/ML integration", "Evaluation", "Prompt or feature engineering"],
@@ -124,7 +124,7 @@ const TEMPLATES: Template[] = [
     name: "Open-source hygiene pass",
     tagline: "Make your repos contributable in an afternoon.",
     description:
-      "Add LICENSE, CONTRIBUTING.md, issue templates, and topics to every public repo. Then make one small PR to an upstream project you actually use — external contributions carry outsized weight.",
+      "Add LICENSE, CONTRIBUTING.md, issue templates, and topics to every public repo. Then make one small pull request to a project you actually use. Contributions to other people's projects count for a lot.",
     skills: ["OSS conventions", "Collaboration"],
     difficulty: "beginner",
     stack: () => ["GitHub", "Markdown"],
@@ -220,12 +220,12 @@ export function fallbackSuggestions(a: Analysis, role: RoleId): Suggestions {
   const capstone = ROLE_CAPSTONE[role];
   picked.push({
     ...capstone,
-    whyYou: `The flagship piece for a ${role.replace("-", "/")} portfolio — recruiters for this role look for ${ROLE_EXPECTATIONS[role].split(":")[0]}.`,
+    whyYou: `The flagship piece for a ${role.replace("-", "/")} portfolio. Recruiters for this role look for ${ROLE_EXPECTATIONS[role].split(":")[0]}.`,
   });
 
   const resumeBullets = a.repos.slice(0, 3).map((r) => {
     const bits = [
-      `Built ${r.name}${r.description ? ` — ${r.description.replace(/\.$/, "")}` : ""}`,
+      `Built ${r.name}${r.description ? `: ${r.description.replace(/\.$/, "")}` : ""}`,
       r.language ? `in ${r.language}` : null,
       r.stars > 0 ? `(${r.stars}★ on GitHub)` : null,
       r.homepage ? "with a live deployment" : null,
@@ -237,12 +237,12 @@ export function fallbackSuggestions(a: Analysis, role: RoleId): Suggestions {
     engine: "rules",
     headline:
       a.overallScore >= 70
-        ? `Strong foundation, ${a.profile.login} — your ${a.overallScore}/100 puts you ahead of most portfolios; the gaps below are polish, not rebuilds.`
+        ? `Strong foundation, ${a.profile.login}. At ${a.overallScore}/100 you're ahead of most portfolios, and the gaps below are polish rather than rebuilds.`
         : a.overallScore >= 40
-          ? `Solid raw material, ${a.profile.login} — at ${a.overallScore}/100 your biggest wins are presentation and coverage, not more code.`
-          : `Plenty of headroom, ${a.profile.login} — at ${a.overallScore}/100 a focused week of fixes below would transform how this profile reads.`,
+          ? `Good raw material, ${a.profile.login}. At ${a.overallScore}/100, your biggest wins are presentation and coverage rather than more code.`
+          : `Lots of room to grow, ${a.profile.login}. At ${a.overallScore}/100, a focused week on the fixes below would change how this profile reads.`,
     strengths: [
-      best ? `${best.name} is your strongest repo (${best.qualityScore}/100) — lead with it everywhere.` : "You have public work to build on.",
+      best ? `${best.name} is your strongest repo (${best.qualityScore}/100), so lead with it.` : "You have public work to build on.",
       a.commits.last90Days > 0
         ? `${a.commits.last90Days} commits in the last 90 days shows an active profile.`
         : `${a.commits.totalSampled} commits sampled across your top repos.`,
@@ -250,7 +250,7 @@ export function fallbackSuggestions(a: Analysis, role: RoleId): Suggestions {
     ],
     resumeBullets,
     resumeTips: [
-      "Put links to your 2–3 best repos directly on your resume — recruiters click before they read.",
+      "Put links to your two or three best repos on your resume. People click before they read.",
       ...openGaps.slice(0, 3).map((g) => `${g.title}: ${g.detail}`),
       "Pin your best repositories on your GitHub profile and give each a one-line description + topics.",
     ],

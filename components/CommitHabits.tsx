@@ -88,7 +88,7 @@ export default function CommitHabits({ habits }: { habits: Habits }) {
 
       <div>
         <h4 className="text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-          When you commit (UTC) — day × hour
+          When you commit, by day and hour (UTC)
         </h4>
         <div className="overflow-x-auto">
           <div className="min-w-[560px]">
@@ -102,7 +102,7 @@ export default function CommitHabits({ habits }: { habits: Habits }) {
                     <div
                       key={hour}
                       role="img"
-                      aria-label={`${DAY_SHORT[day]} ${hour}:00 UTC — ${count} commits`}
+                      aria-label={`${DAY_SHORT[day]} ${hour}:00 UTC: ${count} commits`}
                       className="aspect-square rounded-[2px] min-w-[10px]"
                       style={{ background: heatColor(count, heatMax) }}
                       onMouseEnter={() => setHovered({ day, hour, count })}
@@ -122,7 +122,7 @@ export default function CommitHabits({ habits }: { habits: Habits }) {
         </div>
         <p className="text-xs mt-2 h-4" style={{ color: "var(--text-secondary)" }}>
           {hovered
-            ? `${DAY_SHORT[hovered.day]} ${hovered.hour}:00 UTC — ${hovered.count} commit${hovered.count === 1 ? "" : "s"}`
+            ? `${DAY_SHORT[hovered.day]} ${hovered.hour}:00 UTC: ${hovered.count} commit${hovered.count === 1 ? "" : "s"}`
             : habits.busiestDay
               ? `Peak: ${habits.busiestDay}${habits.busiestHourUtc !== null ? ` around ${habits.busiestHourUtc}:00 UTC` : ""} · ${habits.last90Days} commits in the last 90 days${habits.messageScore != null ? ` · message craft ${habits.messageScore}/100` : ""}`
               : ""}

@@ -12,26 +12,26 @@ export interface Faq {
 export const FAQS: Faq[] = [
   {
     q: "What is RepoLens?",
-    a: "RepoLens is a free web app that analyzes any public GitHub profile and scores it out of 100 on how well it presents its owner to recruiters and hiring managers. It reviews repository quality, README quality, commit habits, language breadth, and open-source collaboration, then tells you exactly what to fix and which five projects to build next.",
+    a: "A free tool that scores a public GitHub profile out of 100 on how it comes across to recruiters and hiring managers. It looks at repository and README quality, commit habits, the languages you use and your open-source work, then tells you what to fix and suggests five projects to build next.",
   },
   {
     q: "Who is RepoLens for?",
-    a: "It is built for students, junior developers, and job-seeking engineers who have public repositories but no clear sense of how those repositories read to someone deciding whether to hire them. Bootcamps, university clubs, and hackathon organizers can also score an entire cohort at once.",
+    a: "Mostly students and early-career developers with public repositories who want to know how those repositories read to someone hiring. Bootcamps, university clubs and hackathon organizers can also score a whole group at once.",
   },
   {
     q: "Is RepoLens free?",
-    a: "Yes, completely free. There is no paid tier, no sign-up, and no credit card. Analyzing a profile requires nothing but a GitHub username. Signing in with GitHub is optional and only unlocks opening suggested fixes as pull requests on your own repositories.",
+    a: "Yes. There's no paid plan and no credit card. Opening a report needs nothing at all, and analyzing a new profile needs a free GitHub sign-in.",
   },
   {
     q: "How is the RepoLens score calculated?",
-    a: "The 0-100 score combines six weighted components: repository quality (45 points), recent activity (15), portfolio coverage across areas like tests, CI, demos and documentation (15), language breadth (10), open-source collaboration such as merged pull requests in other people's projects (10), and commit-message craft (5). Every weight is published on the methodology page.",
+    a: "It adds up six parts: repository quality (45 points), recent activity (15), coverage of things like tests, CI, demos and documentation (15), language breadth (10), open-source collaboration such as merged pull requests in other people's projects (10), and commit messages (5). Every weight is on the methodology page.",
   },
   {
     q: "What counts as a good score?",
-    a: "Scores of 80 and above are rated EXCELLENT, 50 to 79 DEVELOPING, and below 50 NEEDS WORK. The scale is deliberately demanding: the median analyzed profile scores around 50, and roughly one profile in ten clears 80, because reaching the top tier requires strong READMEs, live demos, recent activity, and real collaboration together.",
+    a: "80 and above is rated Excellent, 50 to 79 Developing, and below 50 Needs work. The scale is hard on purpose. The typical profile scores around 50 and about one in ten clears 80, because the top tier takes strong READMEs, live demos, recent activity and real collaboration all at once.",
   },
   {
     q: "Does RepoLens need access to my GitHub account?",
-    a: "No. It reads only public data through the official GitHub API, so you can analyze any profile without signing in. Optional GitHub sign-in is used solely to open pull requests on repositories you own, and RepoLens never requests access to private repositories.",
+    a: "Not to open reports. Analyzing a new profile needs you to sign in with GitHub, but the RepoLens app asks for no permissions: it can only read what's already public, it can't see private repositories, and it can't change anything. Your sign-in stays in your browser for up to 8 hours.",
   },
 ];

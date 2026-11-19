@@ -9,7 +9,7 @@ import { SITE_URL } from "@/lib/site";
  * #0d1117, blue→violet gradient, lens logo, mono accents.
  */
 
-export const alt = "RepoLens — GitHub portfolio analyzer";
+export const alt = "RepoLens, a GitHub portfolio analyzer";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

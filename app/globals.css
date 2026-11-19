@@ -1,20 +1,22 @@
 @import "tailwindcss";
 
 /*
- * RepoLens — deep-space dark theme (committed single theme).
- * Chart colors are the validated dark-mode palette from the dataviz method;
- * charts reference roles (var(--series-N)), never raw hex.
+ * RepoLens shares its look with rianfernando.com: a near-black page, Instrument
+ * Serif headings, Inter for reading, JetBrains Mono only for numbers and tags,
+ * flat cards with a hairline border, and pill buttons. No gradients on text,
+ * no glow, no glass. Chart colors are the validated dark-mode palette; charts
+ * reference roles (var(--series-N)), never raw hex.
  */
 :root {
-  --page: #0d1117;
-  --surface-1: #161b22;
-  --glass: rgba(22, 27, 34, 0.66);
-  --text-primary: #ffffff;
-  --text-secondary: #b8c0cc;
-  --text-muted: #8b949e;
-  --grid-hairline: #21262d;
-  --axis: #30363d;
-  --border: rgba(255, 255, 255, 0.1);
+  --page: #08080c;
+  --surface-1: #0f0f15;
+  --glass: #0f0f15; /* legacy alias — cards are flat now */
+  --text-primary: #ececf4;
+  --text-secondary: #a8a8b8;
+  --text-muted: #7d7d8e;
+  --grid-hairline: #1d1d26;
+  --axis: #2b2b36;
+  --border: rgba(255, 255, 255, 0.09);
   --border-bright: rgba(255, 255, 255, 0.18);
   --delta-good: #0ca30c;
 
@@ -29,22 +31,21 @@
   --series-8: #d95926;
   --series-other: #52514e;
 
-  /* brand accents (handoff): blue + violet share chroma/lightness */
+  /* brand: the logo keeps its blue-to-violet; the UI uses the blue as its one accent */
   --brand-blue: #79b8ff;
   --brand-violet: #a78bfa;
-  --brand-gradient: linear-gradient(135deg, #79b8ff, #a78bfa);
   --accent: #2a78d6;
   --accent-bright: #3987e5;
 
-  /* score tiers (handoff): high / mid / low */
+  /* score tiers: high / mid / low */
   --tier-high: oklch(72% 0.17 145);
   --tier-mid: oklch(78% 0.17 95);
   --tier-low: oklch(68% 0.19 25);
 
-  --meter-track: #0d366b;
+  --meter-track: #172238;
 
-  /* sequential heat scale — near-zero recedes into the dark surface */
-  --heat-0: #232527;
+  /* sequential heat scale — near-zero recedes into the page */
+  --heat-0: #1a1a22;
   --heat-1: #0d366b;
   --heat-2: #184f95;
   --heat-3: #1c5cab;
@@ -66,46 +67,203 @@ html {
 body {
   background: var(--page);
   color: var(--text-primary);
-  font-family: var(--font-display), system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* type system: Space Grotesk carries display, JetBrains Mono carries data accents */
-.font-display,
-h1, h2, h3 {
-  font-family: var(--font-display), system-ui, sans-serif;
-  letter-spacing: -0.01em;
+::selection {
+  background: rgba(121, 184, 255, 0.28);
+}
+
+/* type: serif for headings (one weight, 400), sans for everything you read */
+h1,
+h2,
+.font-display {
+  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+}
+h3 {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  letter-spacing: -0.005em;
 }
 .font-mono-accent {
   font-family: var(--font-mono), ui-monospace, monospace;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
 }
 
-/* ---------- marquee (echoes the portfolio's ✦ ticker) ---------- */
-.marquee {
-  overflow: hidden;
+.link {
+  color: var(--brand-blue);
+  text-underline-offset: 3px;
+}
+.link:hover {
+  text-decoration: underline;
+}
+
+/* ---------- surfaces ---------- */
+
+.card {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+.card-hover {
+  transition: border-color 150ms ease;
+}
+.card-hover:hover {
+  border-color: var(--border-bright);
+}
+
+/* small tag, like the stack chips on rianfernando.com */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  line-height: 1;
+  padding: 5px 9px;
+  border: 1px solid var(--border-bright);
+  border-radius: 9999px;
+  color: var(--text-secondary);
+}
+
+/* ---------- buttons ---------- */
+
+.btn-accent,
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-radius: 9999px;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-weight: 500;
   white-space: nowrap;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
 }
-.marquee-track {
-  display: inline-block;
-  animation: marquee 30s linear infinite;
+.btn-accent {
+  background: var(--text-primary);
+  border: 1px solid var(--text-primary);
+  color: var(--page);
 }
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+.btn-accent:hover:not(:disabled) {
+  background: #ffffff;
+  border-color: #ffffff;
+}
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border-bright);
+  color: var(--text-primary);
+}
+.btn-ghost:hover {
+  border-color: rgba(255, 255, 255, 0.34);
+  background: rgba(255, 255, 255, 0.03);
 }
 
-/* ---------- terminal-style analyzing log ---------- */
-.termline {
-  opacity: 0;
-  animation: term-in 300ms ease forwards;
+/* ---------- navigation ---------- */
+
+.nav-link {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border-radius: 9999px;
+  transition: color 150ms ease, background-color 150ms ease;
 }
-@keyframes term-in {
-  from { opacity: 0; transform: translateX(-6px); }
-  to { opacity: 1; transform: translateX(0); }
+.nav-link:hover {
+  color: var(--text-primary);
+}
+.nav-link[aria-current="page"] {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+/* ---------- forms ---------- */
+
+.input-dark {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: transparent;
+  border: 1px solid var(--border-bright);
+  border-radius: 12px;
+  color: var(--text-primary);
+  transition: border-color 150ms ease;
+}
+select.input-dark {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23898781' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 30px;
+}
+select.input-dark option {
+  background: var(--page);
+  color: var(--text-primary);
+}
+/* keep Chrome autofill from painting inputs white */
+.input-dark:-webkit-autofill,
+.input-dark:-webkit-autofill:hover,
+.input-dark:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--page) inset;
+  -webkit-text-fill-color: var(--text-primary);
+  caret-color: var(--text-primary);
+}
+.input-dark:focus {
+  outline: none;
+  border-color: var(--text-secondary);
+}
+.input-dark::placeholder {
+  color: var(--text-muted);
+}
+
+/* ---------- small things ---------- */
+
+.spinner {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  border-radius: 9999px;
+  border: 2px solid var(--border-bright);
+  border-top-color: var(--text-primary);
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2.4s;
+  }
+}
+
+/* divide-y separators use the hairline token. Tailwind v4 draws them as bottom
+   borders on every child but the last, so color all children, not just siblings. */
+.divide-y > :not([hidden]) {
+  border-color: var(--grid-hairline);
+}
+
+/* keyboard focus: always visible, never clipped */
+:focus-visible {
+  outline: 2px solid var(--brand-blue);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* tabular figures only where numbers must align vertically */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* recharts chrome — recessive, solid hairlines */
+.recharts-cartesian-axis-tick text {
+  fill: var(--text-muted);
+  font-size: 11px;
+}
+.recharts-tooltip-wrapper {
+  outline: none;
 }
 
 /* ---------- print / recruiter export ---------- */
@@ -134,180 +292,23 @@ h1, h2, h3 {
     --heat-5: #256abf;
     --heat-6: #184f95;
   }
-  body { background: #fff !important; }
-  .print-hide { display: none !important; }
+  body {
+    background: #fff !important;
+  }
+  .print-hide {
+    display: none !important;
+  }
   .card {
     background: #fff;
     border-color: rgba(11, 11, 11, 0.15);
-    backdrop-filter: none;
-    box-shadow: none !important;
     break-inside: avoid;
   }
-  .text-glow { -webkit-text-fill-color: initial; background: none; color: #0b0b0b; }
 }
-.print-only { display: none; }
+.print-only {
+  display: none;
+}
 @media print {
-  .print-only { display: block; }
-}
-
-/* ---------- abstract background layer ---------- */
-
-.bg-grid {
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-  background-size: 44px 44px;
-  mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, black 30%, transparent 75%);
-}
-
-.orb {
-  position: absolute;
-  border-radius: 9999px;
-  filter: blur(90px);
-  opacity: 0.5;
-  pointer-events: none;
-}
-.orb-blue {
-  background: radial-gradient(circle at 30% 30%, rgba(57, 135, 229, 0.55), transparent 65%);
-}
-.orb-aqua {
-  background: radial-gradient(circle at 60% 40%, rgba(25, 158, 112, 0.4), transparent 65%);
-}
-.orb-violet {
-  background: radial-gradient(circle at 50% 50%, rgba(167, 139, 250, 0.32), transparent 65%);
-}
-
-@keyframes drift {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(30px, -24px) scale(1.06); }
-  66% { transform: translate(-24px, 18px) scale(0.97); }
-}
-.animate-drift { animation: drift 18s ease-in-out infinite; }
-.animate-drift-slow { animation: drift 26s ease-in-out infinite reverse; }
-
-@keyframes spin-slow {
-  to { transform: rotate(360deg); }
-}
-.animate-spin-slow { animation: spin-slow 40s linear infinite; }
-
-/* ---------- surfaces & motion ---------- */
-
-.card {
-  background: var(--glass);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  transition: border-color 200ms ease, transform 200ms ease, box-shadow 200ms ease;
-}
-.card-hover:hover {
-  border-color: var(--border-bright);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px -18px rgba(57, 135, 229, 0.35);
-}
-
-@keyframes fade-up {
-  from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.reveal {
-  animation: fade-up 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .reveal, .animate-drift, .animate-drift-slow, .animate-spin-slow {
-    animation: none;
+  .print-only {
+    display: block;
   }
-  .card, .card-hover:hover {
-    transition: none;
-    transform: none;
-  }
-}
-
-.btn-accent {
-  background: var(--brand-gradient);
-  color: #0d1117;
-  border-radius: 12px;
-  font-weight: 700;
-  transition: filter 150ms ease, transform 150ms ease;
-}
-.btn-accent:hover:not(:disabled) {
-  filter: brightness(1.08);
-  transform: translateY(-1px);
-}
-.btn-ghost {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  color: var(--text-secondary);
-  transition: border-color 150ms ease, color 150ms ease;
-}
-.btn-ghost:hover {
-  border-color: var(--border-bright);
-  color: var(--text-primary);
-}
-
-.input-dark {
-  appearance: none;
-  -webkit-appearance: none;
-  background-color: rgba(13, 13, 13, 0.6);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  color: var(--text-primary);
-  transition: border-color 150ms ease, box-shadow 150ms ease;
-}
-select.input-dark {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23898781' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 30px;
-}
-/* keep Chrome autofill from painting inputs white */
-.input-dark:-webkit-autofill,
-.input-dark:-webkit-autofill:hover,
-.input-dark:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0 1000px #141413 inset;
-  -webkit-text-fill-color: var(--text-primary);
-  caret-color: var(--text-primary);
-}
-.input-dark:focus {
-  outline: none;
-  border-color: var(--accent-bright);
-  box-shadow: 0 0 0 3px rgba(57, 135, 229, 0.2);
-}
-.input-dark::placeholder {
-  color: var(--text-muted);
-}
-
-/* gradient headline text */
-.text-glow {
-  background: linear-gradient(135deg, #ffffff 15%, #79b8ff 55%, #a78bfa 90%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* divide-y separators use the hairline token, not Tailwind's default */
-.divide-y > :not([hidden]) ~ :not([hidden]) {
-  border-color: var(--grid-hairline);
-}
-
-/* keyboard focus: always visible, brand-colored, never clipped */
-:focus-visible {
-  outline: 2px solid var(--brand-blue);
-  outline-offset: 2px;
-  border-radius: 6px;
-}
-
-/* tabular figures only where numbers must align vertically */
-.tnum {
-  font-variant-numeric: tabular-nums;
-}
-
-/* recharts chrome — recessive, solid hairlines */
-.recharts-cartesian-axis-tick text {
-  fill: var(--text-muted);
-  font-size: 11px;
-}
-.recharts-tooltip-wrapper {
-  outline: none;
 }

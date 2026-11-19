@@ -31,7 +31,7 @@ jobs:
           echo "RepoLens score: $SCORE/100 (~top \$((100-PCT))% estimated)"
           echo "$RESULT" | jq -r '.openGaps[] | "gap: \\(.)"'
           if [ "$SCORE" -lt "$MIN_SCORE" ]; then
-            echo "::error::Portfolio score $SCORE fell below threshold $MIN_SCORE — see ${APP_URL}/u/\${{ github.repository_owner }}"
+            echo "::error::Portfolio score $SCORE fell below threshold $MIN_SCORE. See ${APP_URL}/u/\${{ github.repository_owner }}"
             exit 1
           fi
 `;
@@ -42,13 +42,13 @@ function Step({ n, title, children }: { n: string; title: string; children: Reac
   return (
     <div className="flex gap-4">
       <span
-        className="font-mono-accent text-sm shrink-0 h-8 w-8 rounded-lg border inline-flex items-center justify-center"
-        style={{ borderColor: "var(--border)", color: "var(--series-1)" }}
+        className="font-mono-accent text-sm shrink-0 w-6 pt-0.5"
+        style={{ color: "var(--text-muted)" }}
       >
         {n}
       </span>
       <div className="min-w-0 flex-1">
-        <h3 className="font-display font-semibold">{title}</h3>
+        <h3 className="font-medium">{title}</h3>
         <div className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
           {children}
         </div>
@@ -60,21 +60,18 @@ function Step({ n, title, children }: { n: string; title: string; children: Reac
 export default function ActionPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 space-y-10">
-      <div className="reveal">
-        <p className="font-mono-accent text-xs uppercase tracking-[0.18em] mb-3" style={{ color: "var(--series-1)" }}>
-          phase 2 ✦ continuous portfolio quality
-        </p>
-        <h1 className="font-display text-4xl font-semibold tracking-tight text-glow">
+      <div>
+        <h1 className="text-5xl sm:text-6xl">
           Your portfolio, under CI
         </h1>
         <p className="mt-3 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
           Code gets tests; portfolios rot silently. This workflow checks your RepoLens score every week and
-          fails loudly when it drops below your bar — so a threshold you set once keeps holding you to it. It
+          fails when it drops below your bar, so a threshold you set once keeps holding you to it. It
           reads the public score API, so there is nothing to install and nothing to pay.
         </p>
       </div>
 
-      <div className="space-y-8 reveal" style={{ animationDelay: "120ms" }}>
+      <div className="space-y-8">
         <Step n="01" title="Add the workflow to your profile repo">
           <p>
             Create this file in any repo you own (your <code className="font-mono-accent">username/username</code>{" "}
@@ -99,14 +96,14 @@ export default function ActionPage() {
 
         <Step n="02" title="Pick your threshold">
           <p>
-            <code className="font-mono-accent">MIN_SCORE: 50</code> is a sensible floor — it means solid READMEs
+            <code className="font-mono-accent">MIN_SCORE: 50</code> is a sensible floor. It means solid READMEs
             on your top repos and at least a few coverage areas hit. Raise it as your score climbs; the roadmap
             on your report shows exactly which fix buys which points.
           </p>
         </Step>
 
         <Step n="03" title="Put the badge where recruiters look">
-          <p>Add the live score badge to your profile README — it links back to your full report:</p>
+          <p>Add the live score badge to your profile README. It links back to your full report:</p>
           <div className="mt-3 rounded-xl border overflow-hidden" style={{ borderColor: "var(--border)" }}>
             <div
               className="flex items-center justify-between px-3 py-2 text-xs border-b font-mono-accent"
@@ -125,13 +122,13 @@ export default function ActionPage() {
         </Step>
       </div>
 
-      <div className="card p-5 text-sm reveal" style={{ animationDelay: "220ms" }}>
-        <h2 className="font-display font-semibold mb-2">The API behind it</h2>
+      <div className="card p-5 text-sm">
+        <h2 className="text-2xl mb-2">The API behind it</h2>
         <p style={{ color: "var(--text-secondary)" }}>
           <code className="font-mono-accent">GET /api/score/&lt;username&gt;</code> returns{" "}
           <code className="font-mono-accent">{`{ score, percentileEstimate, parts, openGaps, analyzedAt }`}</code>{" "}
           from your latest RepoLens analysis, cached at the edge for six hours. It deliberately never contacts
-          GitHub itself — scheduled checks from many repos must not turn into automated crawling — so re-analyze
+          GitHub itself, because scheduled checks from many repos must never turn into automated crawling. Re-analyze
           your profile on RepoLens after you improve it, and the next check picks up the new score.
         </p>
       </div>

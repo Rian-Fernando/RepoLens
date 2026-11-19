@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 function H2({ children, id }: { children: React.ReactNode; id?: string }) {
   return (
-    <h2 id={id} className="font-display text-xl font-semibold mt-9 mb-2 scroll-mt-20">
+    <h2 id={id} className="text-3xl mt-12 mb-3 scroll-mt-20">
       {children}
     </h2>
   );
@@ -27,22 +27,19 @@ function P({ children }: { children: React.ReactNode }) {
 export default function PrivacyPage() {
   return (
     <article className="mx-auto max-w-2xl px-4 py-12">
-      <p className="font-mono-accent text-xs uppercase tracking-[0.18em] mb-3 reveal" style={{ color: "var(--brand-blue)" }}>
-        plain words ✦ no dark patterns
-      </p>
-      <h1 className="font-display text-4xl font-semibold tracking-tight text-glow reveal">Privacy</h1>
+      <h1 className="text-5xl sm:text-6xl">Privacy</h1>
 
-      <div className="reveal" style={{ animationDelay: "120ms" }}>
+      <div>
         <H2>What RepoLens reads</H2>
         <P>
-          Only public GitHub data, through GitHub&apos;s official API, and only when someone asks for an
-          analysis. RepoLens never requests access to private repositories. Requests are made one at a time,
-          capped per visitor and per hour, and paused automatically whenever GitHub signals a rate limit.
+          Only public GitHub data, through GitHub&apos;s official API, and only when a signed-in visitor asks
+          for an analysis. RepoLens never requests access to private repositories. Requests are made one at a
+          time, capped per person and per hour, and stopped as soon as GitHub signals a rate limit.
         </P>
 
         <H2>What RepoLens stores</H2>
         <P>
-          For each analyzed GitHub username: the score, the primary language and the date — these power the
+          For each analyzed GitHub username: the score, the primary language and the date. These power the
           leaderboard, percentiles and score history. It also keeps a cached copy of the latest analysis so
           repeat views don&apos;t query GitHub again; that copy is replaced whenever the profile is
           re-analyzed and kept until then, or until removal is requested.
@@ -50,7 +47,7 @@ export default function PrivacyPage() {
         <P>
           To enforce per-visitor limits, RepoLens stores a salted hash of the visitor&apos;s network address
           that changes every day. Raw IP addresses are never stored, and the hashes are deleted after 24 hours.
-          An email address is stored only if someone subscribes to score alerts — a feature that is currently
+          An email address is stored only if someone subscribes to score alerts, a feature that is currently
           switched off.
         </P>
 
@@ -58,17 +55,27 @@ export default function PrivacyPage() {
         <P>
           The written review, README drafts and job matching may be generated with Google&apos;s Gemini API
           free tier. Google may use content sent to its free tier to improve its products, including human
-          review. RepoLens therefore sends only project data — repository names, descriptions, languages,
-          topics and scores — plus any job description you paste. It never sends names, bios or usernames.
+          review. RepoLens therefore sends only project data (repository names, descriptions, languages,
+          topics and scores) plus any job description you paste. It never sends names, bios or usernames.
           Visitors in the European Economic Area, the United Kingdom and Switzerland are always served by the
           built-in rules engine instead, and nothing they do is sent to Gemini.
         </P>
 
-        <H2>Tokens and sign-in</H2>
+        <H2>Signing in with GitHub</H2>
         <P>
-          A GitHub token pasted into the form is used for that one analysis and never stored. Optional GitHub
-          sign-in, used only to open pull requests on your own repositories, keeps its token in an httpOnly
-          cookie in your browser for eight hours; RepoLens does not store it on its servers.
+          You only need to sign in to analyze a profile that hasn&apos;t been analyzed yet. Sign-in goes through
+          a GitHub App that asks for no permissions, so it can only read what&apos;s already public, can&apos;t
+          see private repositories or your email, and can&apos;t change anything. Each analysis you start runs on
+          your own GitHub rate limit.
+        </P>
+        <P>
+          Your sign-in is kept in an httpOnly cookie in your browser for up to 8 hours, along with your GitHub
+          username so the page can show who&apos;s signed in. RepoLens doesn&apos;t store either on its servers.
+          You can sign out at any time, or remove RepoLens from{" "}
+          <a href="https://github.com/settings/apps/authorizations" className="link">
+            your authorized GitHub Apps
+          </a>
+          .
         </P>
 
         <H2>Other services</H2>
@@ -88,8 +95,8 @@ export default function PrivacyPage() {
 
         <H2 id="removing-a-profile">Removing a profile</H2>
         <P>
-          If your GitHub profile appears on RepoLens and you&apos;d like it removed — from the leaderboard,
-          percentiles, score history and the cache — ask through the Feedback button on any page, or open an
+          If your GitHub profile appears on RepoLens and you&apos;d like it removed from the leaderboard,
+          percentiles, score history and the cache, ask through the Feedback button on any page, or open an
           issue on{" "}
           <a
             href="https://github.com/Rian-Fernando/RepoLens/issues"

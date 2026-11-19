@@ -75,7 +75,7 @@ export default function RepoQuality({ repos, login }: { repos: RepoAnalysis[]; l
             </button>
 
             {isOpen ? (
-              <div className="reveal">
+              <div>
                 <div className="mt-3 grid sm:grid-cols-2 gap-4 text-sm">
                   <div>
                     <div className="font-medium mb-1" style={{ color: "var(--text-secondary)" }}>
@@ -97,7 +97,7 @@ export default function RepoQuality({ repos, login }: { repos: RepoAnalysis[]; l
                       README gaps
                     </div>
                     {repo.readmeFindings.length === 0 ? (
-                      <p style={{ color: "var(--text-secondary)" }}>Nothing missing — nice.</p>
+                      <p style={{ color: "var(--text-secondary)" }}>Nothing missing here.</p>
                     ) : (
                       <ul className="list-disc pl-4 space-y-0.5" style={{ color: "var(--text-secondary)" }}>
                         {repo.readmeFindings.map((f) => (

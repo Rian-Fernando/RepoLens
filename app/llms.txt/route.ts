@@ -10,43 +10,43 @@ export const dynamic = "force-static";
 
 const CONTENT = `# RepoLens
 
-> RepoLens is a free web app that analyzes any public GitHub profile and scores it out of 100 on how well it presents its owner to recruiters and hiring managers. It measures repository quality, README quality, commit habits, language breadth, open-source collaboration, and portfolio coverage, then generates role-targeted fixes — including AI-drafted READMEs that can be opened as real pull requests — and five specific projects the developer should build next. Built by Rian Fernando. No sign-up, no payment, no API keys required.
+> RepoLens is a free web app that scores a public GitHub profile out of 100 on how it comes across to recruiters and hiring managers. It looks at repository quality, README quality, commit habits, language breadth, open-source collaboration and coverage of things like tests, CI and live demos. Then it lists the fixes in order of how many points each is worth, drafts the missing READMEs, licenses and CI workflows, and suggests five projects to build next. It was built by Rian Fernando. Opening a report needs no account; analyzing a new profile needs a free GitHub sign-in.
 
 ## What it does
 
-RepoLens answers one question: what does your GitHub say about you to someone deciding whether to hire you? Enter any public GitHub username and it returns a 0–100 portfolio score with a full breakdown in about twenty seconds. It is aimed at students, junior developers, and job-seeking engineers who have public repositories but no clear sense of how those repositories read to an outsider.
+RepoLens answers one question: what does your GitHub say about you to someone deciding whether to hire you? Enter a public GitHub username and it returns a score out of 100 with a full breakdown. A fresh analysis takes about twenty seconds. It's aimed at students, junior developers and job-seeking engineers who have public repositories but no clear sense of how those repositories read to someone else.
 
-The score is computed from six weighted components: repository quality (45 points), recent activity (15), portfolio coverage (15), language breadth (10), open-source collaboration (10), and commit-message craft (5). Every weight is published at [the methodology page](${SITE_URL}/methodology).
+The score adds up six parts: repository quality (45 points), recent activity (15), coverage (15), language breadth (10), open-source collaboration (10) and commit messages (5). Every weight is published on [the methodology page](${SITE_URL}/methodology).
 
 ## Key features
 
-- [Portfolio analysis](${SITE_URL}/) — score any public GitHub profile 0–100, with per-repository quality breakdowns, README scoring, a commit day/hour heatmap, and language distribution.
-- [Role targeting](${SITE_URL}/) — retune the analysis and recommendations for frontend, backend, full-stack, data/ML, or DevOps roles.
-- Fix Kit — generates the missing pieces for weak repositories (README drafts, MIT license, CI workflow) and can open them as real pull requests on the signed-in user's own repositories via GitHub OAuth.
-- Improvement roadmap — each detected gap becomes a checklist item labeled with the exact number of score points it would earn.
-- [Job match](${SITE_URL}/match) — paste a job description and get a readiness score with every requirement mapped to concrete evidence in the user's repositories, plus what is missing.
-- [Head-to-head compare](${SITE_URL}/compare) — compare two GitHub profiles across seven categories.
-- [Leaderboard](${SITE_URL}/leaderboard) — ranked scores of every profile analyzed, grouped into tiers and filterable by primary language.
-- [Cohort ranking](${SITE_URL}/org) — score an entire GitHub organization or a pasted list of usernames, with CSV export, for hackathons, bootcamps, and classrooms.
-- [CI score check](${SITE_URL}/action) — a GitHub Actions workflow that re-scores a profile weekly and fails the build if the score drops below a threshold.
-- Score badge — an embeddable SVG badge showing a live score, for profile READMEs.
-- Shareable reports — every analysis lives at a public URL and unfurls as a branded score card on social platforms.
+- [Portfolio analysis](${SITE_URL}/): a score out of 100 with per-repository quality, README grades, a commit heatmap and the languages used.
+- [Role targeting](${SITE_URL}/): tune the review for frontend, backend, full-stack, data and ML, or DevOps roles.
+- Fix kit: drafts what a weak repository is missing (a README, an MIT license, a CI workflow), ready to copy into it.
+- Improvement roadmap: each gap becomes a checklist item labeled with the points it would earn.
+- [Job match](${SITE_URL}/match): paste a job description and see which requirements your repositories actually show, which are thin, and what's missing.
+- [Compare](${SITE_URL}/compare): two GitHub profiles side by side across seven categories.
+- [Leaderboard](${SITE_URL}/leaderboard): every profile analyzed, ranked and grouped into tiers, filterable by primary language.
+- [Cohort ranking](${SITE_URL}/org): paste a list of usernames to score and rank a whole group, with CSV export, for bootcamps, clubs and hackathons.
+- [CI score check](${SITE_URL}/action): a GitHub Actions workflow that fails when your score drops below a threshold you set.
+- Score badge: an SVG badge with your latest score, for a profile README.
+- Shareable reports: every analysis has a public link that shows a score card when shared.
 
 ## How scoring works
 
-Tiers: EXCELLENT (80–100), DEVELOPING (50–79), NEEDS WORK (0–49). The median analyzed profile scores around 50, and roughly one profile in ten clears 80. Percentiles are computed against every profile ever analyzed on the site, counting each person once by their most recent score.
+Tiers: Excellent (80 to 100), Developing (50 to 79) and Needs work (0 to 49). The typical analyzed profile scores around 50, and about one in ten clears 80. Percentiles compare a profile with every profile ever analyzed on the site, counting each person once by their latest score.
 
-Repository quality is scored per repository out of 100: README quality (25 points), recent pushes (15), description (10), topics (10), license (10), live demo link (10), community stars (10), and README presence (10).
+Each repository is scored out of 100: README quality (25 points), recent pushes (15), description (10), topics (10), license (10), live demo link (10), stars (10) and having a README at all (10).
 
-RepoLens reads only public GitHub data through the official GitHub API. It cannot see private repositories and does not evaluate source-code quality directly — it measures the signals around the code that determine whether someone else can understand and trust it. Full detail: [methodology](${SITE_URL}/methodology).
+RepoLens reads only public GitHub data, through GitHub's official API, on behalf of the signed-in person who asked for the analysis. It can't see private repositories and doesn't judge the code itself. It measures the signals around the code that decide whether someone else can understand it and trust it. Full detail: [methodology](${SITE_URL}/methodology).
 
 ## Tech stack
 
-Next.js 15 (App Router) and TypeScript, deployed on Vercel. Data comes from the GitHub REST API. AI features use the Google Gemini API free tier, with a deterministic rule-based engine as a fallback so the app works with no API key at all. Benchmarks and score history are stored in Neon Postgres. Charts use Recharts; the interface uses three.js and anime.js for motion. The entire stack runs on free tiers — RepoLens costs nothing to operate.
+Next.js and TypeScript, deployed on Vercel. Profile data comes from the GitHub REST API through a GitHub App that requests no permissions. The written review uses the Google Gemini API free tier, with a built-in rules engine as a fallback, so the app still works when there's no AI quota left. Scores and history are stored in Neon Postgres, and charts use Recharts. The whole stack runs on free tiers.
 
 ## Is it free?
 
-Yes, completely. There is no paid tier, no sign-up, and no credit card. Signing in with GitHub is optional and only unlocks opening fixes as pull requests.
+Yes. There's no paid plan and no credit card. Opening a report needs nothing at all. Analyzing a new profile needs a free GitHub sign-in, which only reads public data and runs on your own GitHub rate limit.
 
 ## Links
 
@@ -54,7 +54,8 @@ Yes, completely. There is no paid tier, no sign-up, and no credit card. Signing 
 - [Source code on GitHub](https://github.com/Rian-Fernando/RepoLens)
 - [How scoring works](${SITE_URL}/methodology)
 - [Guide: making your GitHub recruiter-ready](${SITE_URL}/guide)
-- Built by Rian Fernando — https://rianfernando.com
+- [Sign in with GitHub](${SITE_URL}/signin)
+- Built by Rian Fernando: https://rianfernando.com
 `;
 
 export function GET() {

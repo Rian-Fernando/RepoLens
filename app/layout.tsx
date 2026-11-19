@@ -1,24 +1,33 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { Manrope, JetBrains_Mono } from "next/font/google";
+import { Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import Background from "@/components/Background";
 import Logo from "@/components/Logo";
+import Nav from "@/components/Nav";
+import AuthButton from "@/components/AuthButton";
 import FeedexRoute from "@/components/FeedexRoute";
-import { PORTFOLIO_LABEL, PORTFOLIO_URL, SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
+import { PORTFOLIO_URL, SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
 
-const display = Manrope({ subsets: ["latin"], variable: "--font-display", weight: ["400", "500", "700", "800"] });
-const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", weight: ["400", "500", "700"] });
+// The same three faces as rianfernando.com.
+const sans = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
+const serif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-serif",
+  display: "swap",
+});
+const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", weight: ["400", "500", "700"], display: "swap" });
 
 const FEEDEX_KEY = process.env.NEXT_PUBLIC_FEEDEX_KEY;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+  title: `${SITE_NAME}, ${SITE_TAGLINE}`,
   description:
-    "Score any GitHub profile — languages, commit habits, repo and README quality — get role-targeted fixes, a README badge, CI checks, and the 5 projects to build next. Free forever.",
+    "Score any public GitHub profile out of 100: repository and README quality, commit habits and collaboration. Then get the fixes, a README badge and five projects worth building next. Free.",
   openGraph: {
     siteName: SITE_NAME,
     type: "website",
@@ -31,40 +40,22 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${mono.variable}`}>
+    <html lang="en" className={`${sans.variable} ${serif.variable} ${mono.variable}`}>
       <body className="min-h-screen flex flex-col">
-        <Background />
         <header
-          className="sticky top-0 z-20 border-b backdrop-blur-md print-hide"
-          style={{ borderColor: "var(--border)", background: "rgba(13,17,23,0.72)" }}
+          className="sticky top-0 z-20 border-b print-hide"
+          style={{ borderColor: "var(--border)", background: "var(--page)" }}
         >
-          <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-4">
-            <a href="/" className="shrink-0 transition-opacity hover:opacity-80">
+          <div className="mx-auto max-w-6xl px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-2">
+            <a href="/" className="shrink-0" aria-label="RepoLens home">
               <Logo />
             </a>
-            <nav className="flex items-center gap-5 text-sm">
-              <a href="/" className="hover:text-white transition-colors" style={{ color: "var(--text-secondary)" }}>
-                Analyze
-              </a>
-              <a href="/match" className="hover:text-white transition-colors" style={{ color: "var(--text-secondary)" }}>
-                Job match
-              </a>
-              <a href="/compare" className="hover:text-white transition-colors" style={{ color: "var(--text-secondary)" }}>
-                Compare
-              </a>
-              <a href="/leaderboard" className="hover:text-white transition-colors" style={{ color: "var(--text-secondary)" }}>
-                Leaderboard
-              </a>
-              <a href="/org" className="hidden sm:inline hover:text-white transition-colors" style={{ color: "var(--text-secondary)" }}>
-                Cohorts
-              </a>
-              <a href="/action" className="hover:text-white transition-colors" style={{ color: "var(--text-secondary)" }}>
-                CI Action
-              </a>
-              <a href="/guide" className="hover:text-white transition-colors" style={{ color: "var(--text-secondary)" }}>
-                Guide
-              </a>
-            </nav>
+            <div className="order-3 w-full md:order-none md:w-auto md:flex-1 md:flex md:justify-center min-w-0">
+              <Nav />
+            </div>
+            <div className="ml-auto md:ml-0 shrink-0">
+              <AuthButton />
+            </div>
           </div>
         </header>
 
@@ -74,20 +65,31 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <footer className="border-t print-hide" style={{ borderColor: "var(--border)" }}>
           <div
-            className="mx-auto max-w-6xl px-4 py-5 flex flex-wrap items-center justify-between gap-2 text-sm"
+            className="mx-auto max-w-6xl px-4 py-6 flex flex-wrap items-center justify-between gap-3 text-sm"
             style={{ color: "var(--text-muted)" }}
           >
-            <span className="font-mono-accent text-xs">
-              crafted by{" "}
+            <span>
+              Built by{" "}
               <a href={PORTFOLIO_URL} className="hover:underline underline-offset-4" style={{ color: "var(--text-secondary)" }}>
-                Rian Fernando ✦ {PORTFOLIO_LABEL}
+                Rian Fernando
+              </a>
+              {" · "}
+              <a
+                href="https://github.com/Rian-Fernando/RepoLens"
+                className="hover:underline underline-offset-4"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                Source on GitHub
               </a>
             </span>
-            <span className="font-mono-accent text-xs">
-              <a href="/methodology" className="hover:underline" style={{ color: "var(--text-secondary)" }}>how scoring works</a>
-              {" ✦ "}
-              <a href="/privacy" className="hover:underline" style={{ color: "var(--text-secondary)" }}>privacy</a>
-              {" ✦ github api ✦ gemini free tier"}
+            <span>
+              <a href="/methodology" className="hover:underline underline-offset-4" style={{ color: "var(--text-secondary)" }}>
+                How scoring works
+              </a>
+              {" · "}
+              <a href="/privacy" className="hover:underline underline-offset-4" style={{ color: "var(--text-secondary)" }}>
+                Privacy
+              </a>
             </span>
           </div>
         </footer>

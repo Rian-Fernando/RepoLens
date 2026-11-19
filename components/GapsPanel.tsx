@@ -24,7 +24,7 @@ export default function GapsPanel({ gaps }: { gaps: GapItem[] }) {
             <div className="text-sm">
               <span className="font-medium">{gap.title}</span>{" "}
               <span
-                className="text-xs uppercase tracking-wide font-semibold"
+                className="text-sm font-medium"
                 style={{ color: s.color }}
               >
                 {s.label}

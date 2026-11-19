@@ -31,13 +31,11 @@ export default async function UserReport({
   const { username } = await params;
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <header className="reveal mb-2">
-        <h1 className="font-display text-2xl font-semibold tracking-tight">
-          <span className="text-glow">@{username}</span>&apos;s GitHub portfolio score
-        </h1>
+      <header className="mb-8">
+        <h1 className="text-4xl sm:text-5xl">{username}&apos;s GitHub portfolio</h1>
         <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
-          A shared RepoLens report. The analysis below runs live against public GitHub data — repository
-          quality, README quality, commit habits, collaboration — and scores the profile out of 100.
+          A RepoLens report: this profile&apos;s public repositories, READMEs, commit habits and collaboration,
+          scored out of 100, with what would raise the score.
         </p>
       </header>
       <PausedNotice />

@@ -31,6 +31,6 @@ export async function POST(req: NextRequest) {
 
   const current = await getLatestScore(login);
   const ok = await addWatch(login, email, current);
-  if (!ok) return NextResponse.json({ error: "Couldn't save the subscription — try again." }, { status: 500 });
+  if (!ok) return NextResponse.json({ error: "Couldn't save the subscription. Try again." }, { status: 500 });
   return NextResponse.json({ ok: true });
 }

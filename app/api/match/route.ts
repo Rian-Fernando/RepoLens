@@ -61,7 +61,8 @@ Rules:
 - For each, judge status strictly from the portfolio data: "evidenced" needs a specific repo or signal; "partial" means adjacent evidence; "missing" means none.
 - Evidence must cite actual repo names or measured signals from the data. Never invent.
 - Actions must be concrete and small ("add integration tests to X", not "learn testing").
-- Readiness weighs must-have requirements over nice-to-haves. Be honest — a 40 that's true beats a 75 that isn't.`;
+- Readiness weighs must-have requirements over nice-to-haves. Be honest: a 40 that's true beats a 75 that isn't.
+- Write in plain, direct sentences, the way a person would say it. Don't use em dashes or emoji.`;
 
 const KNOWN_TECH = [
   "javascript", "typescript", "python", "java", "go", "rust", "c#", "c++", "ruby", "php", "swift", "kotlin",
@@ -94,7 +95,7 @@ function fallbackMatch(a: Analysis, jd: string): MatchResult {
       status: (hit ? (repos.length > 0 ? "evidenced" : "partial") : "missing") as "evidenced" | "partial" | "missing",
       evidence: repos.join(", "),
       action: hit
-        ? `Make ${repos[0] ?? "a relevant repo"} more prominent — pin it and name ${tech} in its description.`
+        ? `Make ${repos[0] ?? "a relevant repo"} more prominent: pin it and mention ${tech} in its description.`
         : `Add a small project (or extend an existing one) that uses ${tech}, with a README section naming it.`,
     };
   });
@@ -104,7 +105,7 @@ function fallbackMatch(a: Analysis, jd: string): MatchResult {
     readiness,
     verdict:
       requirements.length === 0
-        ? "Couldn't extract recognizable tech requirements from this posting — try pasting the full description."
+        ? "Couldn't find recognizable tech requirements in this posting. Try pasting the full description."
         : `Keyword match: your portfolio shows evidence for ${evidencedCount} of ${requirements.length} recognizable requirements. Add a free GEMINI_API_KEY for a deeper AI reading.`,
     requirements,
     engine: "rules",
@@ -123,7 +124,7 @@ export async function POST(req: NextRequest) {
     }
   } catch {
     return NextResponse.json(
-      { error: "Send { analysis, jd } — the job description needs at least a paragraph." },
+      { error: "Send { analysis, jd }. The job description needs at least a paragraph." },
       { status: 400 },
     );
   }

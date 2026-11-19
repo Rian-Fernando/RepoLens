@@ -14,7 +14,7 @@ export default function CopyButton({ text, label = "Copy" }: { text: string; lab
       }}
       className="btn-ghost px-3 py-1.5 text-xs cursor-pointer"
     >
-      {copied ? "✓ Copied" : label}
+      {copied ? "Copied" : label}
     </button>
   );
 }

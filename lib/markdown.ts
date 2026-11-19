@@ -7,7 +7,7 @@ export function buildMarkdownReport(a: Analysis, s: Suggestions | null): string 
   const tier = getTier(a.overallScore);
   const roadmap = buildRoadmap(a);
   const lines: string[] = [
-    `# RepoLens report — @${a.profile.login}`,
+    `# RepoLens report for @${a.profile.login}`,
     "",
     `**Score: ${a.overallScore}/100 (${tier.label})**${a.bench?.percentile != null ? ` · better than ${a.bench.percentile}% of ${a.bench.sample} analyzed profiles` : ""}`,
     "",
@@ -25,13 +25,13 @@ export function buildMarkdownReport(a: Analysis, s: Suggestions | null): string 
     "",
     "## Roadmap",
     "",
-    ...roadmap.map((item) => `- [ ] ${item.title} (+${item.gain} pts) — ${item.detail}`),
+    ...roadmap.map((item) => `- [ ] ${item.title} (+${item.gain} points): ${item.detail}`),
   ];
 
   if (s) {
     lines.push("", "## 5 projects to build next", "");
     s.projects.forEach((p, i) => {
-      lines.push(`${i + 1}. **${p.name}** — ${p.tagline}`, `   ${p.whyYou}`, "");
+      lines.push(`${i + 1}. **${p.name}**: ${p.tagline}`, `   ${p.whyYou}`, "");
     });
     lines.push("## Resume bullets", "", ...s.resumeBullets.map((b) => `- ${b}`));
   }

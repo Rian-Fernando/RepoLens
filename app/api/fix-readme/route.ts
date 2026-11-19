@@ -35,7 +35,7 @@ const SCHEMA = {
 const SYSTEM = `You write excellent GitHub READMEs. Given repo metadata, produce a complete, ready-to-commit README.md.
 Structure: # title + one-line pitch · badges placeholder comment · Features · Quick start (install/run commands appropriate to the language) · Usage example with a code block · a "Screenshots" section with an HTML comment telling the author what to capture · Roadmap (3 items) · License line.
 For the clone command use exactly: git clone https://github.com/OWNER/REPO.git (the literal words OWNER and REPO) — they are filled in afterwards.
-Rules: never invent features that aren't implied by the name/description/topics — where you must assume, mark it with a "<!-- TODO: verify -->" comment. Keep it under 120 lines. No preamble — output only the file content.`;
+Rules: never invent features that aren't implied by the name/description/topics — where you must assume, mark it with a "<!-- TODO: verify -->" comment. Keep it under 120 lines. No preamble: output only the file content. Write in plain, direct sentences, the way a person would say it. Don't use em dashes or emoji.`;
 
 function templateReadme(r: FixRequest): string {
   const install =
@@ -46,7 +46,7 @@ function templateReadme(r: FixRequest): string {
         : "npm install\nnpm run dev";
   return `# ${r.repoName}
 
-${r.description ?? "<!-- TODO: one-line pitch — what does this do and for whom? -->"}
+${r.description ?? "<!-- TODO: one-line pitch. What does this do, and for whom? -->"}
 
 ${r.homepage ? `**Live demo:** ${r.homepage}` : "<!-- TODO: add a live demo link once deployed -->"}
 
@@ -64,7 +64,7 @@ ${install}
 
 ## Screenshots
 
-<!-- TODO: add one screenshot or GIF of the main flow — this is the highest-impact 10 minutes you can spend -->
+<!-- TODO: add one screenshot or GIF of the main flow. It's the most useful ten minutes you can spend on this README. -->
 
 ## Roadmap
 
@@ -72,7 +72,7 @@ ${install}
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).
 `;
 }
 

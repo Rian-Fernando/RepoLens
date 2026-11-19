@@ -1,8 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Ring2 } from "ldrs/react";
-import "ldrs/react/Ring2.css";
 import type { Analysis, Suggestions } from "@/lib/types";
 import { ROLES, type RoleId } from "@/lib/roles";
 import { estimatePercentile } from "@/lib/percentile";
@@ -16,17 +14,30 @@ import SuggestionsPanel from "@/components/SuggestionsPanel";
 import Roadmap from "@/components/Roadmap";
 import ScoreRing from "@/components/ScoreRing";
 import CopyButton from "@/components/CopyButton";
-import HeroTitle from "@/components/HeroTitle";
-import Marquee from "@/components/Marquee";
-import AnalyzingLog from "@/components/AnalyzingLog";
 import RoleRadar from "@/components/RoleRadar";
 import Sparkline from "@/components/Sparkline";
 import ScoreHistory from "@/components/ScoreHistory";
 import WatchButton from "@/components/WatchButton";
 import GoalChip from "@/components/GoalChip";
+import SignInPrompt from "@/components/SignInPrompt";
 import { buildMarkdownReport } from "@/lib/markdown";
 
 type Phase = "idle" | "analyzing" | "done";
+
+interface AuthState {
+  live: boolean;
+  configured: boolean;
+  login: string | null;
+}
+
+class AnalyzeError extends Error {
+  constructor(
+    message: string,
+    public needsSignIn = false,
+  ) {
+    super(message);
+  }
+}
 
 async function postJson<T>(url: string, body: unknown): Promise<T> {
   const res = await fetch(url, {
@@ -35,20 +46,31 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
     body: JSON.stringify(body),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error((data as { error?: string }).error ?? `Request failed (${res.status})`);
+  if (!res.ok) {
+    const d = data as { error?: string; needsSignIn?: boolean };
+    throw new AnalyzeError(d.error ?? `Request failed (${res.status})`, Boolean(d.needsSignIn));
+  }
   return data as T;
 }
 
-function SectionLabel({ n, title }: { n: string; title: string }) {
-  return (
-    <div className="flex items-baseline gap-2.5 mb-4">
-      <span className="font-mono-accent text-[11px]" style={{ color: "var(--series-1)" }}>
-        {n}
-      </span>
-      <h3 className="font-display font-semibold">{title}</h3>
-    </div>
-  );
+/** "3 hours ago", "4 months ago" */
+function ago(minutes: number): string {
+  if (minutes < 2) return "just now";
+  if (minutes < 60) return `${minutes} minutes ago`;
+  const h = Math.round(minutes / 60);
+  if (h < 36) return `${h} hour${h === 1 ? "" : "s"} ago`;
+  const d = Math.round(minutes / 1440);
+  if (d < 45) return `${d} days ago`;
+  const mo = Math.round(d / 30);
+  if (mo < 18) return `${mo} months ago`;
+  return `${Math.round(d / 365)} years ago`;
 }
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return <h2 className="text-2xl mb-4">{children}</h2>;
+}
+
+const EXAMPLES = ["torvalds", "sindresorhus", "karpathy"];
 
 export default function Analyzer({
   initialUsername = "",
@@ -60,50 +82,57 @@ export default function Analyzer({
   hero?: boolean;
 }) {
   const [username, setUsername] = useState(initialUsername);
-  const [token, setToken] = useState("");
   const [role, setRole] = useState<RoleId>("fullstack");
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [needsSignIn, setNeedsSignIn] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [suggestions, setSuggestions] = useState<Suggestions | null>(null);
   const [suggestError, setSuggestError] = useState<string | null>(null);
   const [suggestLoading, setSuggestLoading] = useState(false);
   const [origin, setOrigin] = useState("");
   const [style, setStyle] = useState<"coach" | "roast">("coach");
+  const [auth, setAuth] = useState<AuthState | null>(null);
   const autoranRef = useRef(false);
 
-  useEffect(() => setOrigin(window.location.origin), []);
+  useEffect(() => {
+    setOrigin(window.location.origin);
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then(setAuth)
+      .catch(() => setAuth(null));
+  }, []);
 
-  const fetchSuggestions = useCallback(async (a: Analysis, r: RoleId, style: "coach" | "roast" = "coach") => {
+  const fetchSuggestions = useCallback(async (a: Analysis, r: RoleId, mode: "coach" | "roast" = "coach") => {
     setSuggestLoading(true);
     setSuggestError(null);
     setSuggestions(null);
     try {
-      setSuggestions(await postJson<Suggestions>("/api/suggest", { analysis: a, role: r, style }));
+      setSuggestions(await postJson<Suggestions>("/api/suggest", { analysis: a, role: r, style: mode }));
     } catch (e) {
-      setSuggestError(e instanceof Error ? e.message : "Suggestions failed.");
+      setSuggestError(e instanceof Error ? e.message : "The review couldn't be written.");
     } finally {
       setSuggestLoading(false);
     }
   }, []);
 
   const run = useCallback(
-    async (name: string, tok: string, r: RoleId) => {
-      if (!name.trim()) return;
+    async (name: string, r: RoleId, refresh = false) => {
+      const login = name.trim().replace(/^@/, "");
+      if (!login) return;
       setPhase("analyzing");
       setError(null);
+      setNeedsSignIn(null);
       setSuggestions(null);
       setSuggestError(null);
       try {
-        const a = await postJson<Analysis>("/api/analyze", {
-          username: name.trim(),
-          token: tok.trim() || undefined,
-        });
+        const a = await postJson<Analysis>("/api/analyze", { username: login, refresh });
         setAnalysis(a);
         setPhase("done");
         void fetchSuggestions(a, r);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Analysis failed.");
+        if (err instanceof AnalyzeError && err.needsSignIn) setNeedsSignIn(login);
+        else setError(err instanceof Error ? err.message : "Analysis failed.");
         setPhase(analysis ? "done" : "idle");
       }
     },
@@ -113,7 +142,7 @@ export default function Analyzer({
   useEffect(() => {
     if (autorun && initialUsername && !autoranRef.current) {
       autoranRef.current = true;
-      void run(initialUsername, "", role);
+      void run(initialUsername, role);
     }
   }, [autorun, initialUsername, role, run]);
 
@@ -123,42 +152,33 @@ export default function Analyzer({
     : "";
   const percentile = analysis ? estimatePercentile(analysis.overallScore) : 0;
   const tier = getTier(analysis?.overallScore ?? 0);
+  const signedIn = Boolean(auth?.login);
 
   return (
     <div className="space-y-8">
       {/* input */}
-      <section className={`print-hide ${analysis ? "" : hero ? "pt-14 sm:pt-20 max-w-2xl mx-auto text-center" : ""}`}>
+      <section className={`print-hide ${analysis || !hero ? "" : "pt-12 sm:pt-20 max-w-3xl"}`}>
         {!analysis && hero && (
           <div>
-            <p
-              className="reveal inline-block font-mono-accent text-[11px] uppercase tracking-[0.18em] rounded-full border px-3 py-1 mb-6"
-              style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
-            >
-              free forever ✦ github api + gemini free tier
-            </p>
-            <HeroTitle lines={[["What", "does", "your"], ["GitHub", "say", "about", "you?"]]} />
-            <p
-              className="reveal mt-5 text-base leading-relaxed max-w-xl mx-auto"
-              style={{ color: "var(--text-secondary)", animationDelay: "500ms" }}
-            >
-              RepoLens scores any public profile, finds what&apos;s missing for your target role, then hands
-              you the fixes — and the 5 projects to build next.
+            <h1 className="text-5xl sm:text-7xl leading-[1.02]">What does your GitHub say about you?</h1>
+            <p className="mt-6 text-lg leading-relaxed max-w-2xl" style={{ color: "var(--text-secondary)" }}>
+              RepoLens reads a public GitHub profile the way a recruiter would, scores it out of 100, and shows you
+              exactly what&apos;s costing you points. Then it drafts the fixes.
             </p>
           </div>
         )}
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            void run(username, token, role);
+            void run(username, role);
           }}
-          className={`mt-7 ${analysis || !hero ? "" : "max-w-xl mx-auto"} reveal`}
-          style={{ animationDelay: hero && !analysis ? "700ms" : "0ms" }}
+          className={`${analysis || !hero ? "" : "mt-9 max-w-2xl"}`}
         >
           <div className="flex flex-col sm:flex-row gap-2">
             <input
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="github username, e.g. torvalds"
+              placeholder="GitHub username"
               aria-label="GitHub username"
               autoCapitalize="none"
               autoCorrect="off"
@@ -177,62 +197,77 @@ export default function Analyzer({
             >
               {ROLES.map((r) => (
                 <option key={r.id} value={r.id}>
-                  Target: {r.label}
+                  {r.label}
                 </option>
               ))}
             </select>
             <button
               type="submit"
               disabled={phase === "analyzing" || !username.trim()}
-              className="btn-accent px-5 py-2.5 disabled:opacity-50 cursor-pointer disabled:cursor-default font-display"
+              className="btn-accent px-6 py-2.5 text-sm disabled:opacity-50 cursor-pointer disabled:cursor-default"
             >
-              {phase === "analyzing" ? "Analyzing…" : "Analyze →"}
+              {phase === "analyzing" ? "Analyzing…" : "Analyze"}
             </button>
           </div>
-          <details className="mt-2 text-left">
-            <summary className="text-sm cursor-pointer" style={{ color: "var(--text-muted)" }}>
-              Optional: GitHub token (raises the rate limit from 60 to 5,000 requests/hour)
-            </summary>
-            <input
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              type="password"
-              placeholder="ghp_… (used for this request only, never stored)"
-              aria-label="GitHub personal access token"
-              className="input-dark mt-2 w-full px-4 py-2 text-sm"
-            />
-          </details>
+
+          {!analysis && hero ? (
+            <p className="mt-3 text-sm" style={{ color: "var(--text-muted)" }}>
+              Or open one that&apos;s already been analyzed:{" "}
+              {EXAMPLES.map((ex, i) => (
+                <span key={ex}>
+                  <a href={`/u/${ex}`} className="link">
+                    {ex}
+                  </a>
+                  {i < EXAMPLES.length - 1 ? ", " : "."}
+                </span>
+              ))}
+            </p>
+          ) : null}
+
+          {auth?.live && auth.configured && !signedIn && !needsSignIn ? (
+            <p className="mt-2 text-sm" style={{ color: "var(--text-muted)" }}>
+              Analyzing a new profile needs a{" "}
+              <a href={`/signin?returnTo=${encodeURIComponent(analysis ? `/u/${analysis.profile.login}` : "/")}`} className="link">
+                GitHub sign-in
+              </a>
+              . Profiles that were already analyzed open without one.
+            </p>
+          ) : null}
+
           {error ? (
-            <p className="mt-3 text-sm font-medium" style={{ color: "var(--status-critical)" }}>
+            <p className="mt-3 text-sm" style={{ color: "var(--status-critical)" }}>
               {error}
             </p>
           ) : null}
         </form>
-        {phase === "analyzing" && !analysis && (
-          <div className="mt-10">
-            <AnalyzingLog username={username.trim()} />
+
+        {needsSignIn ? (
+          <div className="mt-6 max-w-3xl">
+            <SignInPrompt returnTo={`/u/${needsSignIn}`} />
           </div>
+        ) : null}
+
+        {phase === "analyzing" && !analysis && (
+          <p className="mt-8 flex items-center gap-3 text-sm" style={{ color: "var(--text-secondary)" }}>
+            <span className="spinner" aria-hidden />
+            Reading {username.trim() || "the profile"}&apos;s public repositories. A fresh analysis takes about 20
+            seconds.
+          </p>
         )}
       </section>
 
-      {!analysis && hero && phase !== "analyzing" ? (
-        <div className="reveal -mx-4" style={{ animationDelay: "900ms" }}>
-          <Marquee />
-        </div>
-      ) : null}
-
       {analysis && (
-        <div className="space-y-6" style={{ opacity: phase === "analyzing" ? 0.5 : 1, transition: "opacity 300ms" }}>
+        <div className="space-y-5" style={{ opacity: phase === "analyzing" ? 0.5 : 1, transition: "opacity 300ms" }}>
           {/* print-only report header */}
           <div className="print-only">
             <p className="text-sm">
-              RepoLens portfolio report — @{analysis.profile.login} — full interactive version: {shareUrl}
+              RepoLens portfolio report for @{analysis.profile.login}. Interactive version: {shareUrl}
             </p>
           </div>
 
-          {/* profile + hero score */}
-          <section className="card p-6 flex flex-col sm:flex-row sm:items-center gap-6 reveal">
-            <div className="flex items-center gap-5 flex-1 min-w-0">
+          {/* profile + score */}
+          <section className="card p-6 flex flex-col sm:flex-row sm:items-center gap-6">
+            <div className="flex items-start gap-5 flex-1 min-w-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={analysis.profile.avatarUrl}
@@ -240,82 +275,83 @@ export default function Analyzer({
                 width={64}
                 height={64}
                 decoding="async"
-                className="h-16 w-16 rounded-full border"
+                className="h-16 w-16 rounded-full border shrink-0"
                 style={{ borderColor: "var(--border-bright)" }}
               />
               <div className="min-w-0">
-                <h2 className="font-display text-xl font-semibold truncate">
-                  {analysis.profile.name ?? analysis.profile.login}{" "}
-                  <a
-                    href={analysis.profile.htmlUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-sm font-normal hover:underline"
-                    style={{ color: "var(--series-1)" }}
-                  >
-                    @{analysis.profile.login}
-                  </a>
-                </h2>
+                <h2 className="text-3xl truncate">{analysis.profile.name ?? analysis.profile.login}</h2>
+                <a
+                  href={analysis.profile.htmlUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm hover:underline underline-offset-4"
+                  style={{ color: "var(--brand-blue)" }}
+                >
+                  github.com/{analysis.profile.login}
+                </a>
                 {analysis.profile.bio ? (
-                  <p className="text-sm mt-0.5 line-clamp-2" style={{ color: "var(--text-secondary)" }}>
+                  <p className="text-sm mt-2 line-clamp-2" style={{ color: "var(--text-secondary)" }}>
                     {analysis.profile.bio}
                   </p>
                 ) : null}
-                <p className="font-mono-accent text-[11px] mt-1.5" style={{ color: "var(--text-muted)" }}>
-                  since {analysis.profile.createdAt.slice(0, 4)} ✦ {formatCompact(analysis.profile.followers)} followers ✦
-                  top {analysis.totals.analyzed} repos analyzed
-                  {analysis.fromCache ? (
-                    <span title="Add your own GitHub token above for a fresh crawl">
-                      {" "}✦ cached {analysis.cacheAgeMinutes != null && analysis.cacheAgeMinutes < 90
-                        ? `${analysis.cacheAgeMinutes}m`
-                        : `${Math.round((analysis.cacheAgeMinutes ?? 0) / 60)}h`} ago
-                    </span>
+                <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
+                  On GitHub since {analysis.profile.createdAt.slice(0, 4)} · {formatCompact(analysis.profile.followers)}{" "}
+                  followers · top {analysis.totals.analyzed} repos analyzed
+                  {analysis.fromCache && analysis.cacheAgeMinutes != null ? ` · analyzed ${ago(analysis.cacheAgeMinutes)}` : ""}
+                  {analysis.fromCache && signedIn ? (
+                    <>
+                      {" · "}
+                      <button
+                        type="button"
+                        onClick={() => void run(analysis.profile.login, role, true)}
+                        className="cursor-pointer underline underline-offset-2 print-hide"
+                        style={{ color: "var(--text-secondary)" }}
+                      >
+                        re-analyze
+                      </button>
+                    </>
                   ) : null}
                 </p>
-                <div className="flex flex-wrap gap-2 mt-3 print-hide">
-                  <CopyButton text={shareUrl} label="⧉ Copy report link" />
+                <div className="flex flex-wrap gap-2 mt-4 print-hide">
+                  <CopyButton text={shareUrl} label="Copy report link" />
                   <CopyButton text={badgeMd} label="Copy README badge" />
                   <a href={`/compare?a=${analysis.profile.login}`} className="btn-ghost px-3 py-1.5 text-xs">
-                    ⚔ Compare vs…
+                    Compare
                   </a>
                   <button type="button" onClick={() => window.print()} className="btn-ghost px-3 py-1.5 text-xs cursor-pointer">
-                    ⎙ Export PDF
+                    Save as PDF
                   </button>
                   <CopyButton text={buildMarkdownReport(analysis, suggestions)} label="Copy as Markdown" />
                   <CopyButton
                     text={`<iframe src="${origin}/api/embed/${analysis.profile.login}" width="360" height="120" style="border:0" title="RepoLens score"></iframe>`}
-                    label="Copy embed"
+                    label="Copy embed code"
                   />
                   <WatchButton login={analysis.profile.login} />
                 </div>
               </div>
             </div>
-            <div className="text-center shrink-0">
+            <div className="text-center shrink-0 sm:pl-6">
               <ScoreRing score={analysis.overallScore} />
-              <div className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
-                Portfolio score
-              </div>
-              <div className="mt-1.5">
-                <span
-                  className="font-mono-accent text-[10px] font-bold tracking-[0.14em] rounded-full px-2.5 py-1 border"
-                  style={{ color: tier.css, borderColor: tier.css }}
-                >
-                  {tier.label}
+              <div className="mt-2">
+                <span className="chip" style={{ color: tier.css, borderColor: tier.css }}>
+                  {tier.name}
                 </span>
               </div>
-              <div className="font-mono-accent text-[11px] mt-2" style={{ color: "var(--text-muted)" }}>
+              <div className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
                 {analysis.bench?.percentile != null
-                  ? `better than ${analysis.bench.percentile}% of ${analysis.bench.sample} analyzed`
-                  : `${percentile >= 50 ? `top ~${100 - percentile}%` : `better than ~${percentile}%`} · estimated`}
+                  ? `Better than ${analysis.bench.percentile}% of ${analysis.bench.sample} profiles`
+                  : `${percentile >= 50 ? `Top ~${100 - percentile}%` : `Better than ~${percentile}%`} (estimated)`}
               </div>
-              <div><GoalChip login={analysis.profile.login} score={analysis.overallScore} /></div>
-              <a href="/methodology" className="font-mono-accent text-[10px] mt-1 inline-block hover:underline print-hide" style={{ color: "var(--text-muted)" }}>
-                how is this scored?
+              <div>
+                <GoalChip login={analysis.profile.login} score={analysis.overallScore} />
+              </div>
+              <a href="/methodology" className="text-xs mt-1 inline-block hover:underline underline-offset-2 print-hide" style={{ color: "var(--text-muted)" }}>
+                How is this scored?
               </a>
               {analysis.bench && analysis.bench.history.length >= 2 ? (
                 <div className="mt-2 flex flex-col items-center gap-0.5">
                   <Sparkline points={analysis.bench.history.map((h) => h.score)} />
-                  <span className="font-mono-accent text-[10px]" style={{ color: "var(--text-muted)" }}>
+                  <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
                     score history
                   </span>
                 </div>
@@ -323,12 +359,12 @@ export default function Analyzer({
             </div>
           </section>
 
-          {/* KPI row */}
-          <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 reveal" style={{ animationDelay: "80ms" }}>
+          {/* key numbers */}
+          <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <StatTile
               label="Public repos"
               value={formatCompact(analysis.totals.publicRepos)}
-              note={`${analysis.totals.forks} forks excluded from scoring`}
+              note={`${analysis.totals.forks} forks left out of scoring`}
             />
             <StatTile label="Total stars" value={formatCompact(analysis.totals.stars)} />
             <StatTile
@@ -337,59 +373,56 @@ export default function Analyzer({
               note={`of ${formatCompact(analysis.commits.totalSampled)} sampled`}
             />
             <StatTile
-              label="READMEs at 50+"
+              label="READMEs scoring 50+"
               value={`${analysis.repos.filter((r) => (r.readmeScore ?? 0) >= 50).length}/${analysis.repos.length}`}
-              note="of analyzed repos"
+              note="of the repos analyzed"
             />
           </section>
 
           {analysis.bench && analysis.bench.history.length >= 3 ? (
-            <section className="card card-hover p-5 reveal" style={{ animationDelay: "110ms" }}>
-              <SectionLabel n="↗" title="Score history" />
+            <section className="card p-6">
+              <SectionTitle>Score history</SectionTitle>
               <ScoreHistory bench={analysis.bench} />
             </section>
           ) : null}
 
-          {/* charts */}
-          <section className="grid lg:grid-cols-2 gap-4 items-start reveal" style={{ animationDelay: "140ms" }}>
-            <div className="card card-hover p-5">
-              <SectionLabel n="01" title="Languages" />
+          <section className="grid lg:grid-cols-2 gap-5 items-start">
+            <div className="card p-6">
+              <SectionTitle>Languages</SectionTitle>
               <LanguageDonut languages={analysis.languages} />
             </div>
-            <div className="card card-hover p-5">
-              <SectionLabel n="02" title="Commit habits" />
+            <div className="card p-6">
+              <SectionTitle>Commit habits</SectionTitle>
               <CommitHabits habits={analysis.commits} />
             </div>
           </section>
 
-          <section className="grid lg:grid-cols-5 gap-4 reveal" style={{ animationDelay: "200ms" }}>
-            <div className="card card-hover p-5 lg:col-span-3">
-              <SectionLabel n="03" title="Repository quality" />
-              <p className="text-xs -mt-2 mb-3" style={{ color: "var(--text-muted)" }}>
-                Click a repo for the breakdown — and a fix kit that drafts the missing pieces.
+          <section className="grid lg:grid-cols-5 gap-5">
+            <div className="card p-6 lg:col-span-3">
+              <SectionTitle>Repository quality</SectionTitle>
+              <p className="text-sm -mt-2 mb-4" style={{ color: "var(--text-muted)" }}>
+                Open a repo to see where its points went, and to draft whatever it&apos;s missing.
               </p>
               <RepoQuality repos={analysis.repos} login={analysis.profile.login} />
             </div>
-            <div className="card card-hover p-5 lg:col-span-2">
-              <SectionLabel n="04" title="Role fit & coverage" />
+            <div className="card p-6 lg:col-span-2">
+              <SectionTitle>Fit for the role</SectionTitle>
               <RoleRadar analysis={analysis} role={role} />
-              <div className="mt-4 pt-4 border-t" style={{ borderColor: "var(--grid-hairline)" }}>
+              <div className="mt-5 pt-5 border-t" style={{ borderColor: "var(--grid-hairline)" }}>
                 <GapsPanel gaps={analysis.gaps} />
               </div>
             </div>
           </section>
 
-          {/* roadmap */}
-          <section className="card card-hover p-5 reveal" style={{ animationDelay: "240ms" }}>
-            <SectionLabel n="05" title="Improvement roadmap" />
+          <section className="card p-6">
+            <SectionTitle>What to fix first</SectionTitle>
             <Roadmap analysis={analysis} />
           </section>
 
-          {/* AI suggestions */}
-          <section className="card p-5 reveal" style={{ animationDelay: "280ms" }}>
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <SectionLabel n="06" title={`The review — tuned for ${ROLES.find((r) => r.id === role)?.label}`} />
-              <div className="flex gap-1.5 -mt-3 print-hide">
+          <section className="card p-6">
+            <div className="flex flex-wrap items-baseline justify-between gap-3 mb-4">
+              <h2 className="text-2xl">The review, for a {ROLES.find((r) => r.id === role)?.label.toLowerCase()} role</h2>
+              <div className="flex gap-1.5 print-hide">
                 {(["coach", "roast"] as const).map((mode) => (
                   <button
                     key={mode}
@@ -397,7 +430,7 @@ export default function Analyzer({
                     onClick={() => {
                       if (style === mode) return;
                       // Roasting someone else is "insulting of others" under Google's
-                      // generative-AI prohibited-use policy — own profiles only.
+                      // generative-AI prohibited-use policy, so it's own-profile only.
                       if (
                         mode === "roast" &&
                         !window.confirm(
@@ -409,27 +442,27 @@ export default function Analyzer({
                       setStyle(mode);
                       void fetchSuggestions(analysis, role, mode);
                     }}
-                    className="font-mono-accent text-[11px] rounded-full border px-3 py-1 cursor-pointer transition-colors"
+                    className="text-xs rounded-full border px-3 py-1 cursor-pointer transition-colors"
                     style={{
-                      borderColor: style === mode ? "var(--brand-blue)" : "var(--border)",
-                      color: style === mode ? "var(--brand-blue)" : "var(--text-muted)",
+                      borderColor: style === mode ? "var(--text-primary)" : "var(--border-bright)",
+                      color: style === mode ? "var(--text-primary)" : "var(--text-muted)",
                     }}
                   >
-                    {mode === "coach" ? "coach" : "🔥 roast"}
+                    {mode === "coach" ? "Straight" : "Roast"}
                   </button>
                 ))}
               </div>
             </div>
             {style === "roast" && suggestions?.engine === "gemini" ? (
-              <p className="font-mono-accent text-[11px] -mt-2 mb-3" style={{ color: "var(--status-serious)" }}>
-                roast mode: same data, less mercy. resume bullets stay serious.
+              <p className="text-xs -mt-2 mb-4" style={{ color: "var(--text-muted)" }}>
+                Same data, less mercy. The resume bullets stay serious.
               </p>
             ) : null}
             {suggestLoading && (
-              <div className="flex items-center gap-3 text-sm" style={{ color: "var(--text-muted)" }}>
-                <Ring2 size="20" stroke="3" speed="0.9" color="#3987e5" />
-                Reading the analysis and drafting your 5 projects…
-              </div>
+              <p className="flex items-center gap-3 text-sm" style={{ color: "var(--text-secondary)" }}>
+                <span className="spinner" aria-hidden />
+                Writing the review and picking five projects to build next…
+              </p>
             )}
             {suggestError && (
               <div className="text-sm">
@@ -437,10 +470,10 @@ export default function Analyzer({
                 <button
                   type="button"
                   onClick={() => fetchSuggestions(analysis, role, style)}
-                  className="mt-2 underline cursor-pointer"
-                  style={{ color: "var(--series-1)" }}
+                  className="mt-2 underline underline-offset-2 cursor-pointer"
+                  style={{ color: "var(--text-secondary)" }}
                 >
-                  Retry
+                  Try again
                 </button>
               </div>
             )}

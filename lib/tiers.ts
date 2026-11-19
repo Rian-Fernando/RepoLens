@@ -6,6 +6,8 @@
 export interface Tier {
   id: "high" | "mid" | "low";
   label: string;
+  /** Sentence case, for running text and on-page chips. */
+  name: string;
   /** CSS color (oklch) for UI */
   css: string;
   /** hex approximation for SVG badges / OG images */
@@ -13,9 +15,9 @@ export interface Tier {
 }
 
 const TIERS: Tier[] = [
-  { id: "high", label: "EXCELLENT", css: "oklch(72% 0.17 145)", hex: "#2eb069" },
-  { id: "mid", label: "DEVELOPING", css: "oklch(78% 0.17 95)", hex: "#c9a20e" },
-  { id: "low", label: "NEEDS WORK", css: "oklch(68% 0.19 25)", hex: "#e0523f" },
+  { id: "high", label: "EXCELLENT", name: "Excellent", css: "oklch(72% 0.17 145)", hex: "#2eb069" },
+  { id: "mid", label: "DEVELOPING", name: "Developing", css: "oklch(78% 0.17 95)", hex: "#c9a20e" },
+  { id: "low", label: "NEEDS WORK", name: "Needs work", css: "oklch(68% 0.19 25)", hex: "#e0523f" },
 ];
 
 export function getTier(score: number): Tier {

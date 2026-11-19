@@ -6,7 +6,7 @@ import { FAQS } from "@/lib/faq";
 import { PORTFOLIO_URL, SITE_NAME, SITE_URL } from "@/lib/site";
 
 const DESCRIPTION =
-  "RepoLens scores any public GitHub profile out of 100 on how it reads to recruiters — repository quality, README quality, commit habits, and collaboration — then generates the fixes and the five projects to build next. Free, no sign-up.";
+  "RepoLens scores any public GitHub profile out of 100 on how it reads to recruiters: repository quality, README quality, commit habits and collaboration. Then it drafts the fixes and suggests five projects to build next. Free.";
 
 export const metadata: Metadata = {
   title: `${SITE_NAME} — score your GitHub profile out of 100, free`,
@@ -32,7 +32,7 @@ const APP_LD = {
     "Repository and README quality analysis",
     "Commit habit visualization",
     "Role-targeted improvement roadmap",
-    "AI-drafted README, license and CI fixes as pull requests",
+    "Drafted README, license and CI workflow fixes",
     "Job description to portfolio matching",
     "Profile comparison and leaderboard",
   ],

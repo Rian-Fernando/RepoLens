@@ -22,35 +22,29 @@ export default async function LeaderboardPage({
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
-      <div className="text-center mb-8 reveal">
-        <p className="font-mono-accent text-xs uppercase tracking-[0.18em] mb-3" style={{ color: "var(--brand-blue)" }}>
-          every analysis counts ✦ public data only
+      <div className="mb-10">
+        <h1 className="text-5xl sm:text-6xl">Leaderboard</h1>
+        <p className="mt-4 text-lg leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+          Every profile RepoLens has analyzed, highest score first. The typical profile scores around 50, so the top
+          group is small on purpose.
         </p>
-        <h1 className="font-display text-4xl font-semibold tracking-tight text-glow">Leaderboard</h1>
-        <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>
-          The highest-scoring portfolios analyzed so far. Analyze yours to claim a spot.
-        </p>
-        <p className="font-mono-accent text-[11px] mt-2" style={{ color: "var(--text-muted)" }}>
-          median score is ~50 by design ✦{" "}
-          <a href="/methodology" className="hover:underline" style={{ color: "var(--brand-blue)" }}>
-            how scoring works →
+        <p className="mt-3 text-sm" style={{ color: "var(--text-muted)" }}>
+          <a href="/methodology" className="link">
+            How scoring works
           </a>
-          {" ✦ "}
-          <a href="/privacy#removing-a-profile" className="hover:underline" style={{ color: "var(--brand-blue)" }}>
-            remove a profile
+          {" · "}
+          <a href="/privacy#removing-a-profile" className="link">
+            Remove a profile
           </a>
         </p>
       </div>
 
       {languages.length > 0 ? (
-        <div className="flex flex-wrap justify-center gap-2 mb-6 reveal">
+        <div className="flex flex-wrap gap-2 mb-8">
           <a
             href="/leaderboard"
-            className={`font-mono-accent text-xs rounded-full border px-3 py-1.5 transition-colors ${!lang ? "" : "hover:text-white"}`}
-            style={{
-              borderColor: !lang ? "var(--brand-blue)" : "var(--border)",
-              color: !lang ? "var(--brand-blue)" : "var(--text-muted)",
-            }}
+            className="chip transition-colors hover:text-white"
+            style={!lang ? { color: "var(--text-primary)", borderColor: "var(--text-primary)" } : undefined}
           >
             all
           </a>
@@ -58,11 +52,8 @@ export default async function LeaderboardPage({
             <a
               key={l}
               href={`/leaderboard?lang=${encodeURIComponent(l)}`}
-              className="font-mono-accent text-xs rounded-full border px-3 py-1.5 transition-colors hover:text-white"
-              style={{
-                borderColor: lang === l ? "var(--brand-blue)" : "var(--border)",
-                color: lang === l ? "var(--brand-blue)" : "var(--text-muted)",
-              }}
+              className="chip transition-colors hover:text-white"
+              style={lang === l ? { color: "var(--text-primary)", borderColor: "var(--text-primary)" } : undefined}
             >
               {l.toLowerCase()}
             </a>
@@ -71,25 +62,25 @@ export default async function LeaderboardPage({
       ) : null}
 
       {rows === null ? (
-        <div className="card p-6 text-center text-sm reveal" style={{ color: "var(--text-secondary)" }}>
-          The score database isn&apos;t connected in this environment yet — set{" "}
+        <div className="card p-6 text-sm" style={{ color: "var(--text-secondary)" }}>
+          The score database isn&apos;t connected in this environment yet. Set{" "}
           <code className="font-mono-accent">DATABASE_URL</code> (free Neon Postgres) to switch the leaderboard,
           real percentiles, and score history on.
         </div>
       ) : rows.length === 0 ? (
-        <div className="card p-6 text-center text-sm reveal" style={{ color: "var(--text-secondary)" }}>
-          No scores recorded yet — be the first:{" "}
-          <a href="/" className="hover:underline" style={{ color: "var(--brand-blue)" }}>
+        <div className="card p-6 text-sm" style={{ color: "var(--text-secondary)" }}>
+          Nothing here yet. Be the first:{" "}
+          <a href="/" className="link">
             analyze your profile
           </a>
           .
         </div>
       ) : (
-        <div className="space-y-6 reveal">
+        <div className="space-y-10">
           {[
-            { min: 80, label: "EXCELLENT", css: "var(--tier-high)", blurb: "80+ · strong docs, demos, activity and collaboration — roughly one in ten profiles" },
-            { min: 50, label: "DEVELOPING", css: "var(--tier-mid)", blurb: "50–79 · solid foundations, clear next steps — where most active developers land" },
-            { min: 0, label: "NEEDS WORK", css: "var(--tier-low)", blurb: "0–49 · big wins available fast (READMEs, demos, licenses)" },
+            { min: 80, label: "Excellent", css: "var(--tier-high)", blurb: "80 and up: strong docs, demos, recent work and real collaboration. About one profile in ten." },
+            { min: 50, label: "Developing", css: "var(--tier-mid)", blurb: "50 to 79: solid foundations with clear next steps. Where most active developers land." },
+            { min: 0, label: "Needs work", css: "var(--tier-low)", blurb: "Under 50: usually quick wins, like READMEs, demo links and licenses." },
           ].map((band, bandIdx, bands) => {
             const max = bandIdx === 0 ? 101 : bands[bandIdx - 1].min;
             const bandRows = rows.filter((r) => r.score >= band.min && r.score < max);
@@ -97,16 +88,17 @@ export default async function LeaderboardPage({
             const offset = rows.findIndex((r) => r.score < max && r.score >= band.min);
             return (
               <section key={band.label}>
-                <div className="flex items-baseline justify-between mb-2 px-1">
-                  <h2 className="font-mono-accent text-xs font-bold tracking-[0.14em]" style={{ color: band.css }}>
+                <div className="mb-3">
+                  <h2 className="text-3xl flex items-baseline gap-3">
+                    <span className="inline-block h-2.5 w-2.5 rounded-full shrink-0" style={{ background: band.css }} aria-hidden />
                     {band.label}
-                    <span className="ml-2 font-normal" style={{ color: "var(--text-muted)" }}>
-                      {bandRows.length} {bandRows.length === 1 ? "profile" : "profiles"}
+                    <span className="font-mono-accent text-sm" style={{ color: "var(--text-muted)" }}>
+                      {bandRows.length}
                     </span>
                   </h2>
-                  <span className="font-mono-accent text-[10px] hidden sm:inline" style={{ color: "var(--text-muted)" }}>
+                  <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
                     {band.blurb}
-                  </span>
+                  </p>
                 </div>
                 <ol className="card divide-y overflow-hidden">
                   {bandRows.map((row, i) => {

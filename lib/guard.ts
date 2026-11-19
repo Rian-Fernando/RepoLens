@@ -15,9 +15,13 @@ export function clientIp(req: Request): string {
   return "unknown";
 }
 
-function visitorKey(req: Request): string {
+function hashKey(source: string): string {
   const day = new Date().toISOString().slice(0, 10);
-  return createHash("sha256").update(`repolens|${day}|${clientIp(req)}`).digest("hex").slice(0, 32);
+  return createHash("sha256").update(`repolens|${day}|${source}`).digest("hex").slice(0, 32);
+}
+
+function visitorKey(req: Request): string {
+  return hashKey(clientIp(req));
 }
 
 /**
@@ -26,6 +30,12 @@ function visitorKey(req: Request): string {
  */
 export async function overLimit(req: Request, bucket: string, limit: number, windowMinutes: number): Promise<boolean> {
   const count = await hitRateBucket(bucket, visitorKey(req), windowMinutes);
+  return count !== null && count > limit;
+}
+
+/** Same as overLimit, keyed by something other than the network address (a GitHub login). */
+export async function overLimitFor(key: string, bucket: string, limit: number, windowMinutes: number): Promise<boolean> {
+  const count = await hitRateBucket(bucket, hashKey(key.toLowerCase()), windowMinutes);
   return count !== null && count > limit;
 }
 

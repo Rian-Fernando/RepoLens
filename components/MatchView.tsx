@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Ring2 } from "ldrs/react";
-import "ldrs/react/Ring2.css";
 import type { Analysis } from "@/lib/types";
 import type { MatchResult } from "@/app/api/match/route";
 import ScoreRing from "./ScoreRing";
+import SignInPrompt from "./SignInPrompt";
 
 async function postJson<T>(url: string, body: unknown): Promise<T> {
   const res = await fetch(url, {
@@ -14,7 +13,10 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
     body: JSON.stringify(body),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error((data as { error?: string }).error ?? `Request failed (${res.status})`);
+  if (!res.ok) {
+    const d = data as { error?: string; needsSignIn?: boolean };
+    throw Object.assign(new Error(d.error ?? `Request failed (${res.status})`), { needsSignIn: Boolean(d.needsSignIn) });
+  }
   return data as T;
 }
 
@@ -29,6 +31,7 @@ export default function MatchView() {
   const [jd, setJd] = useState("");
   const [phase, setPhase] = useState<"idle" | "analyzing" | "matching">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [needsSignIn, setNeedsSignIn] = useState(false);
   const [result, setResult] = useState<MatchResult | null>(null);
   const [who, setWho] = useState("");
 
@@ -36,6 +39,7 @@ export default function MatchView() {
     e.preventDefault();
     if (phase !== "idle" || !username.trim() || jd.trim().length < 80) return;
     setError(null);
+    setNeedsSignIn(false);
     setResult(null);
     try {
       setPhase("analyzing");
@@ -45,7 +49,8 @@ export default function MatchView() {
       setWho(analysis.profile.login);
       setResult(match);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Match failed.");
+      if (err && typeof err === "object" && "needsSignIn" in err && err.needsSignIn) setNeedsSignIn(true);
+      else setError(err instanceof Error ? err.message : "Match failed.");
     } finally {
       setPhase("idle");
     }
@@ -53,7 +58,7 @@ export default function MatchView() {
 
   return (
     <div className="space-y-8">
-      <form onSubmit={run} className="space-y-2 reveal">
+      <form onSubmit={run} className="space-y-2">
         <input
           value={username}
           onChange={(e) => setUsername(e.target.value)}
@@ -79,7 +84,7 @@ export default function MatchView() {
           <button
             type="submit"
             disabled={phase !== "idle" || !username.trim() || jd.trim().length < 80}
-            className="btn-accent px-5 py-2.5 disabled:opacity-50 cursor-pointer font-display"
+            className="btn-accent px-5 py-2.5 text-sm disabled:opacity-50 cursor-pointer"
           >
             {phase === "analyzing" ? "Analyzing profile…" : phase === "matching" ? "Mapping requirements…" : "Check my readiness →"}
           </button>
@@ -87,19 +92,20 @@ export default function MatchView() {
       </form>
 
       {phase !== "idle" && (
-        <div className="flex items-center justify-center gap-3 text-sm" style={{ color: "var(--text-muted)" }}>
-          <Ring2 size="20" stroke="3" speed="0.9" color="#79b8ff" />
+        <div className="flex items-center gap-3 text-sm" style={{ color: "var(--text-secondary)" }}>
+          <span className="spinner" aria-hidden />
           {phase === "analyzing" ? "Reading the GitHub profile…" : "Comparing the posting against your evidence…"}
         </div>
       )}
+      {needsSignIn ? <SignInPrompt returnTo="/match" /> : null}
       {error && (
-        <p className="text-sm text-center font-medium" style={{ color: "var(--status-critical)" }}>
+        <p className="text-sm" style={{ color: "var(--status-critical)" }}>
           {error}
         </p>
       )}
 
       {result && (
-        <div className="space-y-6 reveal">
+        <div className="space-y-6">
           <div className="card p-6 flex flex-col sm:flex-row items-center gap-6">
             <div className="text-center shrink-0">
               <ScoreRing score={result.readiness} size={116} />
@@ -111,11 +117,11 @@ export default function MatchView() {
               <p className="leading-relaxed" style={{ color: "var(--text-secondary)" }}>
                 {result.verdict}
               </p>
-              <p className="font-mono-accent text-[11px] mt-3" style={{ color: "var(--text-muted)" }}>
-                @{who} ✦ {result.requirements.filter((r) => r.status === "evidenced").length} evidenced ·{" "}
+              <p className="text-xs mt-3" style={{ color: "var(--text-muted)" }}>
+                @{who} · {result.requirements.filter((r) => r.status === "evidenced").length} evidenced ·{" "}
                 {result.requirements.filter((r) => r.status === "partial").length} partial ·{" "}
-                {result.requirements.filter((r) => r.status === "missing").length} missing ✦{" "}
-                {result.engine === "gemini" ? "AI reading" : "keyword reading"}
+                {result.requirements.filter((r) => r.status === "missing").length} missing ·{" "}
+                {result.engine === "gemini" ? "read by Gemini" : "keyword match"}
               </p>
             </div>
           </div>
@@ -136,7 +142,7 @@ export default function MatchView() {
                     <div className="min-w-0 flex-1 text-sm">
                       <div className="flex flex-wrap items-baseline gap-2">
                         <span className="font-medium">{r.requirement}</span>
-                        <span className="font-mono-accent text-[10px] uppercase tracking-wider" style={{ color: ui.color }}>
+                        <span className="text-xs" style={{ color: ui.color }}>
                           {ui.label}
                         </span>
                       </div>

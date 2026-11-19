@@ -11,21 +11,24 @@ by, or sponsored by GitHub, Google, or any other party named here.**
 | [Google Gemini API](https://ai.google.dev) | The written review, project ideas and README drafts (optional) | [Gemini API terms](https://ai.google.dev/gemini-api/terms) |
 
 RepoLens reads **only public data**, through official APIs. It never requests access to
-private repositories. Optional GitHub sign-in uses the `public_repo` scope solely to open pull
-requests on repositories the signed-in user owns.
+private repositories. Analyzing a new profile needs a GitHub sign-in through a GitHub App that
+requests **no permissions**: it can read public data on the signed-in visitor's behalf, and
+nothing else.
 
 ### How RepoLens uses the GitHub API
 
 Following GitHub's [REST API best practices](https://docs.github.com/en/rest/using-the-rest-api/best-practices-for-using-the-rest-api)
 and [rate-limit rules](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api):
 
-- A GitHub request is only ever made because a person clicked **Analyze**. Badges, OG cards,
-  the score API and the embed widget read cached results and never contact GitHub.
+- A GitHub request is only ever made because a signed-in person clicked **Analyze**, and it
+  runs on that person's own GitHub rate limit. Badges, OG cards, the score API and the embed
+  widget read cached results and never contact GitHub.
+- Nothing is ever crawled anonymously or with a shared server token.
 - Requests are made **one at a time**, never concurrently.
 - A rate-limited response pauses all GitHub requests until the time GitHub specifies; nothing
   is retried automatically. The last 20% of the hourly quota is never spent.
-- Each visitor may start 3 fresh analyses per hour, and the whole site at most 20 per hour on
-  the shared quota (about 17% of it). There is no scheduled crawling and no bulk collection.
+- Each signed-in person may start 10 fresh analyses an hour. There is no scheduled crawling
+  and no bulk collection.
 - All GitHub access can be switched off with one setting (`GITHUB_API_ENABLED`), and is off
   unless explicitly enabled.
 
@@ -65,11 +68,11 @@ as a checklist, never as a verdict.
 
 Built with [Next.js](https://nextjs.org), [React](https://react.dev),
 [TypeScript](https://www.typescriptlang.org), [Tailwind CSS](https://tailwindcss.com),
-[Recharts](https://recharts.org), [three.js](https://threejs.org),
-[anime.js](https://animejs.com), [ldrs](https://uiball.com/ldrs/) and the
-[Neon serverless driver](https://neon.tech). Typefaces are
-[Manrope](https://fonts.google.com/specimen/Manrope) and
-[JetBrains Mono](https://www.jetbrains.com/lp/mono/), both under the SIL Open Font License.
+[Recharts](https://recharts.org) and the [Neon serverless driver](https://neon.tech).
+Typefaces are [Inter](https://fonts.google.com/specimen/Inter),
+[Instrument Serif](https://fonts.google.com/specimen/Instrument+Serif),
+[JetBrains Mono](https://www.jetbrains.com/lp/mono/) and, on the preview images,
+[Manrope](https://fonts.google.com/specimen/Manrope), all under the SIL Open Font License.
 Each dependency remains under its own license; see `package.json` and the respective projects.
 
 ## Trademarks

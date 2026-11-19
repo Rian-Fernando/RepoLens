@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sessionLogin, sessionToken } from "@/lib/oauth";
+import { FIX_PRS_ENABLED, loginForToken, sessionToken } from "@/lib/oauth";
 import { GITHUB_API_ENABLED, GITHUB_PAUSED_MESSAGE } from "@/lib/github";
 
 export const maxDuration = 60;
@@ -42,8 +42,15 @@ export async function POST(req: NextRequest) {
   if (!GITHUB_API_ENABLED) {
     return NextResponse.json({ error: GITHUB_PAUSED_MESSAGE }, { status: 503 });
   }
+  if (!FIX_PRS_ENABLED) {
+    return NextResponse.json(
+      { error: "Opening pull requests isn't available yet. Copy the draft and commit it yourself." },
+      { status: 503 },
+    );
+  }
   const token = await sessionToken();
-  const login = token ? await sessionLogin() : null;
+  // The owner check must come from GitHub itself, not from a cookie.
+  const login = token ? await loginForToken(token) : null;
   if (!token || !login) {
     return NextResponse.json({ error: "Sign in with GitHub first." }, { status: 401 });
   }

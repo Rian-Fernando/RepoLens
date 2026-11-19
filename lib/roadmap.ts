@@ -19,7 +19,7 @@ const ACTIONS: Array<{
     id: "readme",
     label: "README quality",
     title: (n) => `Fix the README${n > 1 ? `s on ${n} repos` : " on 1 repo"}`,
-    detail: "Use the Fix Kit to draft one — pitch, quick-start, screenshot, usage example.",
+    detail: "Draft one from the repo's fix kit: a short pitch, setup steps, a screenshot and a usage example.",
   },
   {
     id: "demo",
@@ -31,7 +31,7 @@ const ACTIONS: Array<{
     id: "recency",
     label: "Recent activity",
     title: (n) => `Push fresh commits to ${n} stale repo${n > 1 ? "s" : ""}`,
-    detail: "Even docs or dependency bumps count — recency is scored per repo.",
+    detail: "Even documentation or dependency updates count, since recency is scored per repo.",
   },
   {
     id: "license",
@@ -43,13 +43,13 @@ const ACTIONS: Array<{
     id: "description",
     label: "Description",
     title: (n) => `Write descriptions for ${n} repo${n > 1 ? "s" : ""}`,
-    detail: "One sharp sentence in the About field — it shows up in search and on your profile.",
+    detail: "One clear sentence in the About field. It shows up in search and on your profile.",
   },
   {
     id: "topics",
     label: "Topics",
     title: (n) => `Tag ${n} repo${n > 1 ? "s" : ""} with topics`,
-    detail: "3-5 topics each (language, domain, framework) — free discoverability.",
+    detail: "Three to five topics each (language, domain, framework), so people can find them.",
   },
 ];
 

@@ -35,7 +35,7 @@ export default function Roadmap({ analysis }: { analysis: Analysis }) {
   if (items.length === 0) {
     return (
       <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-        Nothing left to fix in the analyzed repos — this portfolio is in great shape.
+        Nothing left to fix in the analyzed repos. This portfolio is in great shape.
       </p>
     );
   }
@@ -97,7 +97,7 @@ export default function Roadmap({ analysis }: { analysis: Analysis }) {
 
       {claimedGain > 0 ? (
         <p className="text-xs mt-3" style={{ color: "var(--status-good)" }}>
-          ✓ {Math.round(claimedGain * 10) / 10} points claimed — run the analysis again to make it official.
+          {Math.round(claimedGain * 10) / 10} points ticked off. Analyze again to make it official.
         </p>
       ) : null}
     </div>

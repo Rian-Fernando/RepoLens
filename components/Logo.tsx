@@ -28,7 +28,7 @@ export default function Logo({ size = 26 }: { size?: number }) {
   return (
     <span className="inline-flex items-center gap-2">
       <LogoMark size={size} id="lg-header" />
-      <span className="font-mono-accent font-bold tracking-tight text-lg" style={{ color: "#f0f4fa" }}>
+      <span className="font-mono-accent font-medium text-base" style={{ color: "var(--text-primary)" }}>
         repolens
       </span>
     </span>
