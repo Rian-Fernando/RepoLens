@@ -1,0 +1,25 @@
+name: Weekly check
+
+# Opens the live site once a week the way a visitor would: pages, sign-in, saved
+# reports, the AI review and job match, images and headers. If anything is broken the
+# run fails and GitHub emails you. Run it any time from the Actions tab.
+on:
+  schedule:
+    - cron: "23 13 * * 1" # Mondays at 13:23 UTC
+  workflow_dispatch:
+
+# Least privilege: the job only reads the repository.
+permissions:
+  contents: read
+
+jobs:
+  live-site:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Check the live site
+        run: node scripts/check-live.mjs https://repolens.rianfernando.com

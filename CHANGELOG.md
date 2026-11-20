@@ -19,6 +19,10 @@ push to `main`.
 - Fixed: share images for profiles and comparisons drew each avatar as a tiny dot, because
   the image size was passed as text. They show the full avatar again
 - Fixed: the README drafter no longer fails when a request leaves out topics or findings
+- A weekly check (GitHub Actions, Mondays) opens the live site the way a visitor would and
+  fails if anything is broken: every page, sign-in, saved reports, the Gemini-written review
+  and job match, share images, headers and the old vercel.app redirect. It never calls the
+  GitHub API. Run it by hand with `node scripts/check-live.mjs`
 
 ## 2026-11-19: Sign in with GitHub, and a plainer design
 
