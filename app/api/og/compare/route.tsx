@@ -18,8 +18,8 @@ function Corner({ login, score }: { login: string; score: number | null }) {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={`https://github.com/${login}.png?size=160`}
-        width="140"
-        height="140"
+        width={140}
+        height={140}
         style={{ borderRadius: 999, border: "4px solid rgba(255,255,255,0.18)" }}
         alt=""
       />

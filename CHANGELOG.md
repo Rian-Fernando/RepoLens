@@ -16,6 +16,9 @@ push to `main`.
   Flash-Lite goes first with low thinking, every attempt has a deadline inside the 60-second
   limit, and a model that is slow or out of quota hands over to the next one instead of
   failing. Before this, a job match could run past the limit and never come back
+- Fixed: share images for profiles and comparisons drew each avatar as a tiny dot, because
+  the image size was passed as text. They show the full avatar again
+- Fixed: the README drafter no longer fails when a request leaves out topics or findings
 
 ## 2026-11-19: Sign in with GitHub, and a plainer design
 

@@ -109,8 +109,8 @@ export default async function OgImage({ params }: { params: Promise<{ username: 
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={data.avatar}
-                  width="96"
-                  height="96"
+                  width={96}
+                  height={96}
                   style={{ borderRadius: 999, border: "3px solid rgba(255,255,255,0.2)" }}
                   alt=""
                 />

@@ -81,6 +81,8 @@ export async function POST(req: NextRequest) {
   try {
     body = (await req.json()) as FixRequest;
     if (!body.repoName || !body.login) throw new Error("bad shape");
+    body.topics = Array.isArray(body.topics) ? body.topics : [];
+    body.findings = Array.isArray(body.findings) ? body.findings : [];
   } catch {
     return NextResponse.json({ error: "Send repo metadata as the request body." }, { status: 400 });
   }
