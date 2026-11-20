@@ -5,6 +5,7 @@ import type { Analysis } from "@/lib/types";
 import type { MatchResult } from "@/app/api/match/route";
 import ScoreRing from "./ScoreRing";
 import SignInPrompt from "./SignInPrompt";
+import Link from "next/link";
 
 async function postJson<T>(url: string, body: unknown): Promise<T> {
   const res = await fetch(url, {
@@ -163,9 +164,9 @@ export default function MatchView() {
 
           <p className="text-xs text-center" style={{ color: "var(--text-muted)" }}>
             Close the gaps faster: open{" "}
-            <a href={`/u/${who}`} className="hover:underline" style={{ color: "var(--brand-blue)" }}>
+            <Link href={`/u/${who}`} className="hover:underline" style={{ color: "var(--brand-blue)" }}>
               your full report
-            </a>{" "}
+            </Link>{" "}
             for the roadmap and fix kit.
           </p>
         </div>

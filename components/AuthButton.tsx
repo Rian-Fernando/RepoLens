@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { GitHubMark } from "./icons";
+import Link from "next/link";
 
 interface AuthState {
   live: boolean;
@@ -26,7 +27,7 @@ export default function AuthButton() {
 
   if (auth.login) {
     return (
-      <div className="flex items-center gap-2.5 text-sm">
+      <div className="flex items-center gap-2.5 text-sm" title={`Signed in as ${auth.login}`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={`https://github.com/${auth.login}.png?size=48`}
@@ -36,7 +37,7 @@ export default function AuthButton() {
           className="h-6 w-6 rounded-full border"
           style={{ borderColor: "var(--border-bright)" }}
         />
-        <span className="hidden sm:inline" style={{ color: "var(--text-secondary)" }}>
+        <span className="hidden xl:inline-block max-w-28 truncate align-middle" style={{ color: "var(--text-secondary)" }}>
           {auth.login}
         </span>
         <button
@@ -55,12 +56,12 @@ export default function AuthButton() {
   }
 
   return (
-    <a
+    <Link
       href={`/signin?returnTo=${encodeURIComponent(pathname)}`}
       className="btn-ghost px-3.5 py-1.5 text-sm"
     >
       <GitHubMark size={14} />
       Sign in
-    </a>
+    </Link>
   );
 }

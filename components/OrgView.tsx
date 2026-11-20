@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Analysis } from "@/lib/types";
 import { getTier } from "@/lib/tiers";
 import SignInPrompt from "./SignInPrompt";
+import Link from "next/link";
 
 /**
  * Cohort ranking: a pasted list of usernames, scored, ranked and exportable
@@ -164,9 +165,9 @@ export default function OrgView() {
                   </span>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={`https://github.com/${r.login}.png?size=48`} alt="" width={28} height={28} loading="lazy" decoding="async" className="h-7 w-7 rounded-full border" style={{ borderColor: "var(--border)" }} />
-                  <a href={`/u/${r.login}`} className="font-medium flex-1 truncate hover:underline">
+                  <Link href={`/u/${r.login}`} className="font-medium flex-1 truncate hover:underline">
                     @{r.login}
-                  </a>
+                  </Link>
                   {r.error ? (
                     <span className="text-xs" style={{ color: "var(--status-critical)" }}>
                       {r.error}

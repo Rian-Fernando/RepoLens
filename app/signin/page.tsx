@@ -3,6 +3,7 @@ import { GitHubMark } from "@/components/icons";
 import SignOutButton from "@/components/SignOutButton";
 import { safeReturnPath, sessionLogin, signInConfigured } from "@/lib/oauth";
 import { SITE_NAME } from "@/lib/site";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: `Sign in with GitHub · ${SITE_NAME}`,
@@ -103,9 +104,9 @@ export default async function SignInPage({
           your authorized GitHub Apps
         </a>
         . More detail is on the{" "}
-        <a href="/privacy" className="link">
+        <Link href="/privacy" className="link">
           privacy page
-        </a>
+        </Link>
         .
       </P>
     </article>

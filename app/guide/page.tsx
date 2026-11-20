@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: `How to make your GitHub recruiter-ready · ${SITE_NAME}`,
@@ -102,9 +103,9 @@ export default function GuidePage() {
 
         <div className="card p-6 mt-10 flex flex-wrap items-center justify-between gap-4">
           <span className="font-display text-2xl">See where your profile stands</span>
-          <a href="/" className="btn-accent px-5 py-2.5 text-sm">
+          <Link href="/" className="btn-accent px-5 py-2.5 text-sm">
             Analyze your profile
-          </a>
+          </Link>
         </div>
       </div>
     </article>

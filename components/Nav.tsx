@@ -1,5 +1,6 @@
 "use client";
 
+import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 
 const ITEMS = [
@@ -12,6 +13,12 @@ const ITEMS = [
   { href: "/guide", label: "Guide" },
 ];
 
+/** Dims a menu item while its page is still loading. Prefetched pages open instantly and never show it. */
+function NavLabel({ children }: { children: React.ReactNode }) {
+  const { pending } = useLinkStatus();
+  return <span className={pending ? "nav-pending" : undefined}>{children}</span>;
+}
+
 export default function Nav() {
   const pathname = usePathname();
   const isActive = (href: string) =>
@@ -20,14 +27,14 @@ export default function Nav() {
   return (
     <nav aria-label="Main" className="flex items-center gap-0.5 overflow-x-auto [scrollbar-width:none]">
       {ITEMS.map((item) => (
-        <a
+        <Link
           key={item.href}
           href={item.href}
           className="nav-link shrink-0"
           aria-current={isActive(item.href) ? "page" : undefined}
         >
-          {item.label}
-        </a>
+          <NavLabel>{item.label}</NavLabel>
+        </Link>
       ))}
     </nav>
   );

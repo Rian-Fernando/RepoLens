@@ -1,4 +1,5 @@
 import { GitHubMark } from "./icons";
+import Link from "next/link";
 
 /** Shown wherever a visitor asks for a profile that needs a live analysis. */
 export default function SignInPrompt({ returnTo, message }: { returnTo: string; message?: string }) {
@@ -11,10 +12,10 @@ export default function SignInPrompt({ returnTo, message }: { returnTo: string; 
             "This profile hasn't been analyzed yet. Live analysis needs a GitHub sign-in: it only reads public data, and it runs on your own GitHub account's rate limit."}
         </p>
       </div>
-      <a href={`/signin?returnTo=${encodeURIComponent(returnTo)}`} className="btn-accent px-4 py-2 text-sm">
+      <Link href={`/signin?returnTo=${encodeURIComponent(returnTo)}`} className="btn-accent px-4 py-2 text-sm">
         <GitHubMark size={15} />
         Sign in with GitHub
-      </a>
+      </Link>
     </div>
   );
 }

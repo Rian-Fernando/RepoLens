@@ -10,6 +10,7 @@ import Nav from "@/components/Nav";
 import AuthButton from "@/components/AuthButton";
 import FeedexRoute from "@/components/FeedexRoute";
 import { PORTFOLIO_URL, SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site";
+import Link from "next/link";
 
 // The same three faces as rianfernando.com.
 const sans = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
@@ -49,13 +50,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           style={{ borderColor: "var(--border)", background: "var(--page)" }}
         >
           <div className="mx-auto max-w-6xl px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-2">
-            <a href="/" className="shrink-0" aria-label="RepoLens home">
+            <Link href="/" className="shrink-0" aria-label="RepoLens home">
               <Logo />
-            </a>
+            </Link>
             <div className="order-3 w-full md:order-none md:w-auto md:flex-1 md:flex md:justify-center min-w-0">
               <Nav />
             </div>
-            <div className="ml-auto md:ml-0 shrink-0">
+            {/* A fixed-size slot, so the menu doesn't shift when the sign-in state arrives */}
+            <div className="ml-auto md:ml-0 shrink-0 flex items-center justify-end min-h-8 min-w-24 xl:min-w-52">
               <AuthButton />
             </div>
           </div>
@@ -85,13 +87,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </a>
             </span>
             <span>
-              <a href="/methodology" className="hover:underline underline-offset-4" style={{ color: "var(--text-secondary)" }}>
+              <Link href="/methodology" className="hover:underline underline-offset-4" style={{ color: "var(--text-secondary)" }}>
                 How scoring works
-              </a>
+              </Link>
               {" · "}
-              <a href="/privacy" className="hover:underline underline-offset-4" style={{ color: "var(--text-secondary)" }}>
+              <Link href="/privacy" className="hover:underline underline-offset-4" style={{ color: "var(--text-secondary)" }}>
                 Privacy
-              </a>
+              </Link>
             </span>
           </div>
         </footer>

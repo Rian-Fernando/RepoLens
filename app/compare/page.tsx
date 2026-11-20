@@ -42,7 +42,7 @@ export default async function ComparePage({
           actually do their job.
         </p>
       </div>
-      <CompareView initialA={a} initialB={b} />
+      <CompareView key={`${a}|${b}`} initialA={a} initialB={b} />
     </div>
   );
 }

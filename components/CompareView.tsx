@@ -5,6 +5,7 @@ import type { Analysis } from "@/lib/types";
 import ScoreRing from "./ScoreRing";
 import { formatCompact } from "./StatTile";
 import SignInPrompt from "./SignInPrompt";
+import Link from "next/link";
 
 async function analyzeUser(username: string): Promise<Analysis> {
   const res = await fetch("/api/analyze", {
@@ -57,9 +58,9 @@ function Corner({ a }: { a: Analysis }) {
         className="h-14 w-14 rounded-full border"
         style={{ borderColor: "var(--border-bright)" }}
       />
-      <a href={`/u/${a.profile.login}`} className="font-semibold hover:underline">
+      <Link href={`/u/${a.profile.login}`} className="font-semibold hover:underline">
         @{a.profile.login}
-      </a>
+      </Link>
       <ScoreRing score={a.overallScore} size={104} />
     </div>
   );
@@ -190,9 +191,9 @@ export default function CompareView({ initialA = "", initialB = "" }: { initialA
             })}
           </ul>
           <p className="text-xs mt-4 text-center" style={{ color: "var(--text-muted)" }}>
-            Open the full report: <a className="hover:underline" style={{ color: "var(--series-1)" }} href={`/u/${a.profile.login}`}>@{a.profile.login}</a>
+            Open the full report: <Link className="hover:underline" style={{ color: "var(--series-1)" }} href={`/u/${a.profile.login}`}>@{a.profile.login}</Link>
             {" · "}
-            <a className="hover:underline" style={{ color: "var(--series-1)" }} href={`/u/${b.profile.login}`}>@{b.profile.login}</a>
+            <Link className="hover:underline" style={{ color: "var(--series-1)" }} href={`/u/${b.profile.login}`}>@{b.profile.login}</Link>
           </p>
         </div>
       )}

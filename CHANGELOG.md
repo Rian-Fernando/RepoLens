@@ -3,6 +3,20 @@
 All notable changes to RepoLens. Dates are release dates; the live app updates on every
 push to `main`.
 
+## 2026-11-19: Smoother navigation, faster AI
+
+- Moving between pages no longer reloads the whole site. Links use client-side navigation, so
+  the header, the star field and the sign-in state stay put, and most pages open in about
+  50 ms. A menu item dims while a page that wasn't prefetched is loading
+- The sign-in button sits in a fixed-size slot, so the menu doesn't shift when it loads, and
+  the stars fade in on the first visit instead of popping in
+- Reports and comparisons reset when their URL changes, so going back and forth between two
+  reports always shows the right person
+- The written review and job match answer in about 4 seconds instead of 15 to 90. Gemini
+  Flash-Lite goes first with low thinking, every attempt has a deadline inside the 60-second
+  limit, and a model that is slow or out of quota hands over to the next one instead of
+  failing. Before this, a job match could run past the limit and never come back
+
 ## 2026-11-19: Sign in with GitHub, and a plainer design
 
 - Live analysis is back behind "Sign in with GitHub", through a GitHub App that requests no

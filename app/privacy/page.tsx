@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SITE_NAME } from "@/lib/site";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: `Privacy · ${SITE_NAME}`,
@@ -110,9 +111,9 @@ export default function PrivacyPage() {
 
         <p className="font-mono-accent text-[11px] mt-10" style={{ color: "var(--text-muted)" }}>
           Last updated 2026-09-25 ·{" "}
-          <a href="/methodology" className="hover:underline" style={{ color: "var(--brand-blue)" }}>
+          <Link href="/methodology" className="hover:underline" style={{ color: "var(--brand-blue)" }}>
             how scoring works
-          </a>
+          </Link>
         </p>
       </div>
     </article>

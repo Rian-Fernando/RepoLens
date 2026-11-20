@@ -39,7 +39,7 @@ export default async function UserReport({
         </p>
       </header>
       <PausedNotice />
-      <Analyzer initialUsername={username} autorun hero={false} />
+      <Analyzer key={username.toLowerCase()} initialUsername={username} autorun hero={false} />
     </div>
   );
 }

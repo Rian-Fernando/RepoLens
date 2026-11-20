@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: `How scoring works · ${SITE_NAME}`,
@@ -136,21 +137,21 @@ export default function MethodologyPage() {
           score, primary language and date) plus the latest copy of each analysis, so a report opens instantly
           the next time. That copy is replaced whenever the profile is analyzed again. Nothing records who
           viewed what, and sign-ins stay in your own browser. The{" "}
-          <a href="/privacy" className="link">
+          <Link href="/privacy" className="link">
             privacy page
-          </a>{" "}
+          </Link>{" "}
           has the details, including how to have a profile removed.
         </P>
 
         <div className="card p-5 mt-8 flex flex-wrap items-center justify-between gap-3">
           <span className="font-display text-2xl">See where you land</span>
           <div className="flex gap-2">
-            <a href="/guide" className="btn-ghost px-4 py-2.5 text-sm">
+            <Link href="/guide" className="btn-ghost px-4 py-2.5 text-sm">
               Read the guide
-            </a>
-            <a href="/" className="btn-accent px-4 py-2.5 text-sm">
+            </Link>
+            <Link href="/" className="btn-accent px-4 py-2.5 text-sm">
               Analyze your profile →
-            </a>
+            </Link>
           </div>
         </div>
       </div>

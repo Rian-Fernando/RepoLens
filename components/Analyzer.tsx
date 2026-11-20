@@ -21,6 +21,7 @@ import WatchButton from "@/components/WatchButton";
 import GoalChip from "@/components/GoalChip";
 import SignInPrompt from "@/components/SignInPrompt";
 import { buildMarkdownReport } from "@/lib/markdown";
+import Link from "next/link";
 
 type Phase = "idle" | "analyzing" | "done";
 
@@ -215,9 +216,9 @@ export default function Analyzer({
               Or open one that&apos;s already been analyzed:{" "}
               {EXAMPLES.map((ex, i) => (
                 <span key={ex}>
-                  <a href={`/u/${ex}`} className="link">
+                  <Link href={`/u/${ex}`} className="link">
                     {ex}
-                  </a>
+                  </Link>
                   {i < EXAMPLES.length - 1 ? ", " : "."}
                 </span>
               ))}
@@ -227,9 +228,9 @@ export default function Analyzer({
           {auth?.live && auth.configured && !signedIn && !needsSignIn ? (
             <p className="mt-2 text-sm" style={{ color: "var(--text-muted)" }}>
               Analyzing a new profile needs a{" "}
-              <a href={`/signin?returnTo=${encodeURIComponent(analysis ? `/u/${analysis.profile.login}` : "/")}`} className="link">
+              <Link href={`/signin?returnTo=${encodeURIComponent(analysis ? `/u/${analysis.profile.login}` : "/")}`} className="link">
                 GitHub sign-in
-              </a>
+              </Link>
               .{!hero || analysis ? " Profiles that were already analyzed open without one." : ""}
             </p>
           ) : null}
@@ -315,9 +316,9 @@ export default function Analyzer({
                 <div className="flex flex-wrap gap-2 mt-4 print-hide">
                   <CopyButton text={shareUrl} label="Copy report link" />
                   <CopyButton text={badgeMd} label="Copy README badge" />
-                  <a href={`/compare?a=${analysis.profile.login}`} className="btn-ghost px-3 py-1.5 text-xs">
+                  <Link href={`/compare?a=${analysis.profile.login}`} className="btn-ghost px-3 py-1.5 text-xs">
                     Compare
-                  </a>
+                  </Link>
                   <button type="button" onClick={() => window.print()} className="btn-ghost px-3 py-1.5 text-xs cursor-pointer">
                     Save as PDF
                   </button>
@@ -345,9 +346,9 @@ export default function Analyzer({
               <div>
                 <GoalChip login={analysis.profile.login} score={analysis.overallScore} />
               </div>
-              <a href="/methodology" className="text-xs mt-1 inline-block hover:underline underline-offset-2 print-hide" style={{ color: "var(--text-muted)" }}>
+              <Link href="/methodology" className="text-xs mt-1 inline-block hover:underline underline-offset-2 print-hide" style={{ color: "var(--text-muted)" }}>
                 How is this scored?
-              </a>
+              </Link>
               {analysis.bench && analysis.bench.history.length >= 2 ? (
                 <div className="mt-2 flex flex-col items-center gap-0.5">
                   <Sparkline points={analysis.bench.history.map((h) => h.score)} />

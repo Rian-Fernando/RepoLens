@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getLeaderboard, getLeaderboardLanguages } from "@/lib/db";
 import { getTier } from "@/lib/tiers";
 import { SITE_NAME } from "@/lib/site";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: `Top-scoring GitHub portfolios · ${SITE_NAME}`,
@@ -29,34 +30,34 @@ export default async function LeaderboardPage({
           group is small on purpose.
         </p>
         <p className="mt-3 text-sm" style={{ color: "var(--text-muted)" }}>
-          <a href="/methodology" className="link">
+          <Link href="/methodology" className="link">
             How scoring works
-          </a>
+          </Link>
           {" · "}
-          <a href="/privacy#removing-a-profile" className="link">
+          <Link href="/privacy#removing-a-profile" className="link">
             Remove a profile
-          </a>
+          </Link>
         </p>
       </div>
 
       {languages.length > 0 ? (
         <div className="flex flex-wrap gap-2 mb-8">
-          <a
+          <Link
             href="/leaderboard"
             className="chip transition-colors hover:text-white"
             style={!lang ? { color: "var(--text-primary)", borderColor: "var(--text-primary)" } : undefined}
           >
             all
-          </a>
+          </Link>
           {languages.map((l) => (
-            <a
+            <Link
               key={l}
               href={`/leaderboard?lang=${encodeURIComponent(l)}`}
               className="chip transition-colors hover:text-white"
               style={lang === l ? { color: "var(--text-primary)", borderColor: "var(--text-primary)" } : undefined}
             >
               {l.toLowerCase()}
-            </a>
+            </Link>
           ))}
         </div>
       ) : null}
@@ -70,9 +71,9 @@ export default async function LeaderboardPage({
       ) : rows.length === 0 ? (
         <div className="card p-6 text-sm" style={{ color: "var(--text-secondary)" }}>
           Nothing here yet. Be the first:{" "}
-          <a href="/" className="link">
+          <Link href="/" className="link">
             analyze your profile
-          </a>
+          </Link>
           .
         </div>
       ) : (
@@ -106,7 +107,7 @@ export default async function LeaderboardPage({
                     const rank = offset + i + 1;
                     return (
                       <li key={row.login}>
-                        <a
+                        <Link
                           href={`/u/${row.login}`}
                           className="flex items-center gap-4 px-5 py-3 transition-colors hover:bg-white/[0.04]"
                         >
@@ -131,7 +132,7 @@ export default async function LeaderboardPage({
                           <span className="font-mono-accent font-bold tnum w-14 text-right" style={{ color: tier.css }}>
                             {row.score}
                           </span>
-                        </a>
+                        </Link>
                       </li>
                     );
                   })}

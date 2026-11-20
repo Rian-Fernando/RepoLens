@@ -1,5 +1,6 @@
 import { FAQS } from "@/lib/faq";
 import { PORTFOLIO_URL } from "@/lib/site";
+import Link from "next/link";
 
 /**
  * The text half of the home page: where the idea came from, how it works, what
@@ -109,9 +110,9 @@ export default function HomeContent() {
         </dl>
         <p className="mt-5 text-sm" style={{ color: "var(--text-muted)" }}>
           Per-repository scoring, the tier thresholds and the limits of what RepoLens can see are on the{" "}
-          <a href="/methodology" className="link">
+          <Link href="/methodology" className="link">
             methodology page
-          </a>
+          </Link>
           .
         </p>
       </section>
@@ -124,9 +125,9 @@ export default function HomeContent() {
             no real idea whether they come across as impressive or abandoned.
           </p>
           <p>
-            If you&apos;re applying for jobs, <a href="/match" className="link">job match</a> checks a posting against
+            If you&apos;re applying for jobs, <Link href="/match" className="link">job match</Link> checks a posting against
             what your repositories actually show. Bootcamps, clubs and hackathon judges can score a whole group at once
-            under <a href="/org" className="link">cohorts</a>.
+            under <Link href="/org" className="link">cohorts</Link>.
           </p>
         </div>
       </section>

@@ -25,6 +25,16 @@ export default function Starfield() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     mount.appendChild(renderer.domElement);
 
+    // Fade the stars in instead of popping them in once three.js has loaded.
+    // The layout keeps this mounted, so it only happens on the first page load.
+    const canvas = renderer.domElement;
+    let fade = 0;
+    if (!reduced) {
+      canvas.style.opacity = "0";
+      canvas.style.transition = "opacity 1.2s ease-out";
+      fade = window.setTimeout(() => (canvas.style.opacity = "1"), 60);
+    }
+
     // Round, soft-edged stars. Without a texture, three.js draws every point as
     // a hard square, which reads as pixels rather than stars up close.
     const starTexture = (() => {
@@ -97,6 +107,7 @@ export default function Starfield() {
     }
 
     return () => {
+      clearTimeout(fade);
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", onResize);
       window.removeEventListener("mousemove", onMouse);
